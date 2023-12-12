@@ -1040,3 +1040,72 @@ cohensD(dat_SDQ %>%
 ```
 
 # RI-CLPM
+
+RI-CLPM is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
+
+```{r mod1: basic model for both ASD and non-ASd}
+RICLPM <- '
+  # Create between components (random intercepts)
+  CM_Inter =~ 1*Exter2 + 1*Exter3 + 1*Exter4 + 1*Exter5 + 1*Exter6 + 1*Exter7
+  CM_Exter =~ 1*Inter2 + 1*Inter3 + 1*Inter4 + 1*Inter5 + 1*Inter6 + 1*Inter7
+  
+  # Create within-person centered variables
+  L_Exter2 =~ 1*Exter2
+  L_Exter3 =~ 1*Exter3
+  L_Exter4 =~ 1*Exter4
+  L_Exter5 =~ 1*Exter5
+  L_Exter6 =~ 1*Exter6
+  L_Exter7 =~ 1*Exter7
+  L_Inter2 =~ 1*Inter2
+  L_Inter3 =~ 1*Inter3
+  L_Inter4 =~ 1*Inter4
+  L_Inter5 =~ 1*Inter5
+  L_Inter6 =~ 1*Inter6
+  L_Inter7 =~ 1*Inter7
+
+  # Estimate lagged effects between within-person centered variables
+  L_Exter3 + L_Inter3 ~ L_Exter2 + L_Inter2
+  L_Exter4 + L_Inter4 ~ L_Exter3 + L_Inter3
+  L_Exter5 + L_Inter5 ~ L_Exter4 + L_Inter4
+  L_Exter6 + L_Inter6 ~ L_Exter5 + L_Inter5
+  L_Exter7 + L_Inter7 ~ L_Exter6 + L_Inter6
+
+  # Estimate covariance between within-person centered variables at first wave
+  L_Exter2 ~~ L_Inter2 # Covariance
+  
+  # Estimate covariances between residuals of within-person centered variables 
+  # (i.e., innovations)
+  L_Exter3 ~~ L_Inter3
+  L_Exter4 ~~ L_Inter4
+  L_Exter5 ~~ L_Inter5
+  L_Exter6 ~~ L_Inter6
+  L_Exter7 ~~ L_Inter7
+  
+  # Estimate variance and covariance of random intercepts
+  CM_Inter ~~ CM_Inter
+  CM_Exter ~~ CM_Exter
+  CM_Inter ~~ CM_Exter
+
+  # Estimate (residual) variance of within-person centered variables
+  L_Exter2 ~~ L_Exter2 # Variances
+  L_Inter2 ~~ L_Inter2 
+  L_Exter3 ~~ L_Exter3 # Residual variances
+  L_Inter3 ~~ L_Inter3 
+  L_Exter4 ~~ L_Exter4 
+  L_Inter4 ~~ L_Inter4 
+  L_Exter5 ~~ L_Exter5 
+  L_Inter5 ~~ L_Inter5 
+  L_Exter6 ~~ L_Exter6
+  L_Inter6 ~~ L_Inter6
+  L_Exter7 ~~ L_Exter7
+  L_Inter7 ~~ L_Inter7
+'
+RICLPM.fit <- lavaan(RICLPM,
+  data = dat, 
+  missing = "ML", 
+  meanstructure = T, 
+  int.ov.free = T
+)
+summary(RICLPM.fit, standardized = T)
+```
+
