@@ -251,8 +251,14 @@ dat_SDQ <- data_ASD_final %>%
          Peer2 = na_if(PeerProb_SDQ_2, -1),
          Prosocial2 = na_if(Prosocial_SDQ_2, -1)) %>% #-1 as NAs
   mutate(Inter2 = if_else(is.na(Emotional2) | is.na(Peer2), NA, Emotional2 + Peer2),
-         Exter2 = if_else(is.na(Conduct2) | is.na(Hyper2), NA, Conduct2 + Hyper2)
-         ) #Creating Internalising and Externalising Scores
+         Exter2 = if_else(is.na(Conduct2) | is.na(Hyper2), NA, Conduct2 + Hyper2),
+         Diff2 = if_else(is.na(Emotional2) | 
+                           is.na(Peer2) | 
+                           is.na(Conduct2) | 
+                           is.na(Hyper2), 
+                         NA, 
+                         Emotional2 + Peer2 + Conduct2 + Hyper2)
+         ) #Creating Internalising, Externalising, and Total Difficulty Scores
 
 #check
 dat_SDQ |> count(Emotional2)
@@ -274,9 +280,15 @@ dat_SDQ <- dat_SDQ %>%
          Peer3 = na_if(PeerProb_SDQ_3, -1),
          Prosocial3 = na_if(Prosocial_SDQ_3, -1)) %>% #-1 as NAs
   mutate(Inter3 = if_else(is.na(Emotional3) | is.na(Peer3), NA, Emotional3 + Peer3),
-         Exter3 = if_else(is.na(Conduct3) | is.na(Hyper3), NA, Conduct3 + Hyper3)
-         ) #Creating Internalising and Externalising Scores
-
+         Exter3 = if_else(is.na(Conduct3) | is.na(Hyper3), NA, Conduct3 + Hyper3), 
+         Diff3 = if_else(is.na(Emotional3) | 
+                           is.na(Peer3) | 
+                           is.na(Conduct3) | 
+                           is.na(Hyper3), 
+                         NA, 
+                         Emotional3 + Peer3 + Conduct3 + Hyper3)
+         ) #Creating Internalising, Externalising and Total Difficulty Scores
+         
 #check
 dat_SDQ |> count(Emotional3)
 dat_SDQ |> count(Conduct3)
@@ -289,7 +301,7 @@ dat_SDQ |> count(Exter3)
 
 ### Wave 4
 
-```{r}
+```{r Wave 4}
 dat_SDQ <- dat_SDQ %>%
   mutate(Emotional4 = na_if(Emotional_SDQ_4, -1),
          Conduct4 = na_if(Conduct_SDQ_4, -1),
@@ -297,8 +309,14 @@ dat_SDQ <- dat_SDQ %>%
          Peer4 = na_if(PeerProb_SDQ_4, -1),
          Prosocial4 = na_if(Prosocial_SDQ_4, -1)) %>% #-1 as NAs
   mutate(Inter4 = if_else(is.na(Emotional4) | is.na(Peer4), NA, Emotional4 + Peer4),
-         Exter4 = if_else(is.na(Conduct4) | is.na(Hyper4), NA, Conduct4 + Hyper4)
-         ) #Creating Internalising and Externalising Scores
+         Exter4 = if_else(is.na(Conduct4) | is.na(Hyper4), NA, Conduct4 + Hyper4), 
+         Diff4 = if_else(is.na(Emotional4) | 
+                           is.na(Peer4) | 
+                           is.na(Conduct4) | 
+                           is.na(Hyper4), 
+                         NA, 
+                         Emotional4 + Peer4 + Conduct4 + Hyper4)
+         ) #Creating Internalising, Externalising and Total Difficulty Scores
 
 #check
 dat_SDQ |> count(Emotional4)
@@ -319,7 +337,7 @@ Hyperactivity scale: Items 2, 10, 15, 21, 25
 Peer problems scale: Items 6, 11, 14, 19, 23
 Prosocial scale: Items 1, 4, 9, 17, 20
 
-```{r}
+```{r Wave 5}
 #parent report items
 dat_SDQ_1 <- dat_SDQ %>% 
   pivot_longer(c(P_w5_SDQ_01:P_w5_SDQ_25), names_to = "item", values_to = "score") #make long form to deal with everything easily
@@ -448,8 +466,14 @@ dat_SDQ <- dat_SDQ %>%
                                 P_w5_SDQ_17 + 
                                 P_w5_SDQ_20)) %>%
   mutate(Inter5 = if_else(is.na(Emotional5) | is.na(Peer5), NA, Emotional5 + Peer5),
-         Exter5 = if_else(is.na(Conduct5) | is.na(Hyper5), NA, Conduct5 + Hyper5)
-         ) #Creating Internalising and Externalising Scores
+         Exter5 = if_else(is.na(Conduct5) | is.na(Hyper5), NA, Conduct5 + Hyper5), 
+         Diff5 = if_else(is.na(Emotional5) | 
+                           is.na(Peer5) | 
+                           is.na(Conduct5) | 
+                           is.na(Hyper5), 
+                         NA, 
+                         Emotional5 + Peer5 + Conduct5 + Hyper5)
+         ) #Creating Internalising, Externalising and Total Difficulty Scores
 
 #check
 dat_SDQ |> count(Emotional5)
@@ -463,7 +487,7 @@ dat_SDQ |> count(Exter5)
 
 ### Wave 6
 
-```{r}
+```{r Wave 6}
 dat_SDQ <- dat_SDQ %>%
   mutate(Emotional6 = na_if(Emotional_P_SDQ_6, -1),
          Conduct6 = na_if(Conduct_P_SDQ_6, -1),
@@ -471,8 +495,14 @@ dat_SDQ <- dat_SDQ %>%
          Peer6 = na_if(PeerProb_P_SDQ_6, -1),
          Prosocial6 = na_if(Prosocial_P_SDQ_6, -1)) %>% #-1 as NAs
   mutate(Inter6 = if_else(is.na(Emotional6) | is.na(Peer6), NA, Emotional6 + Peer6),
-         Exter6 = if_else(is.na(Conduct6) | is.na(Hyper6), NA, Conduct6 + Hyper6)
-         ) #Creating Internalising and Externalising Scores
+         Exter6 = if_else(is.na(Conduct6) | is.na(Hyper6), NA, Conduct6 + Hyper6), 
+         Diff6 = if_else(is.na(Emotional6) | 
+                           is.na(Peer6) | 
+                           is.na(Conduct6) | 
+                           is.na(Hyper6), 
+                         NA, 
+                         Emotional6 + Peer6 + Conduct6 + Hyper6)
+         ) #Creating Internalising, Externalising and Total Difficulty Scores
 
 #check
 dat_SDQ |> count(Emotional6)
@@ -486,7 +516,7 @@ dat_SDQ |> count(Exter6)
 
 ### Wave 7
 
-```{r}
+```{r Wave 7}
 dat_SDQ <- dat_SDQ %>%
   mutate(Emotional7 = na_if(Emotional_P_SDQ_7, -1),
          Conduct7 = na_if(Conduct_P_SDQ_7, -1),
@@ -494,8 +524,14 @@ dat_SDQ <- dat_SDQ %>%
          Peer7 = na_if(PeerProb_P_SDQ_7, -1),
          Prosocial7 = na_if(Prosocial_P_SDQ_7, -1)) %>% #-1 as NAs
   mutate(Inter7 = if_else(is.na(Emotional7) | is.na(Peer7), NA, Emotional7 + Peer7),
-         Exter7 = if_else(is.na(Conduct7) | is.na(Hyper7), NA, Conduct7 + Hyper7)
-         ) #Creating Internalising and Externalising Scores
+         Exter7 = if_else(is.na(Conduct7) | is.na(Hyper7), NA, Conduct7 + Hyper7), 
+         Diff7 = if_else(is.na(Emotional7) | 
+                           is.na(Peer7) | 
+                           is.na(Conduct7) | 
+                           is.na(Hyper7), 
+                         NA, 
+                         Emotional7 + Peer7 + Conduct7 + Hyper7)
+         ) #Creating Internalising, Externalising and Total Difficulty Scores
 
 #check
 dat_SDQ |> count(Emotional7)
@@ -509,30 +545,236 @@ dat_SDQ |> count(Exter7)
 ##sum(is.na(dat_SDQ$Total_P_SDQ_7) == is.na(dat_SDQ$Emotional7))
 ```
 
+```{r rm unused dataset to clean up environment}
+rm(data, 
+   data_ASD_combined, 
+   data_ASD_final, 
+   data_ASD3, 
+   data_ASD4, 
+   data_ASD5, 
+   data_ASD6, 
+   data_eth, 
+   data_sex, 
+   data_sex_combined, 
+   data_sex_final, 
+   data_sex3, 
+   MCS
+   )
+```
+
 # Descriptive Stats
 
 ## ASD
 
-```{r}
-
+```{r Desc ASD}
+dat_SDQ %>% 
+  count(ASD_final) %>% 
+  mutate(prop = n/sum(n))
 ```
 
 ## Sex
 
-```{r}
-
+```{r Sex}
+dat_SDQ %>% 
+  count(sex_final) %>% 
+  mutate(prop = n/sum(n))
 ```
 
 ## Sex and ASD
 
-```{r}
+```{r Sex and ASD}
+#ASD group
+dat_SDQ %>% 
+  filter(ASD_final == "ASD") %>% 
+  count(sex_final) %>% 
+  mutate(prop = n/sum(n))
 
+#non-ASD group
+dat_SDQ %>% 
+  filter(ASD_final == "Non-ASD") %>% 
+  count(sex_final) %>% 
+  mutate(prop = n/sum(n))
+
+#graph
+dat_SDQ %>% 
+  count(sex_final, ASD_final) %>% 
+  mutate(prop = n/sum(n)) %>%
+  ggplot(aes(x = ASD_final, y = n, fill = sex_final)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "ASD Diagnosis", y = "Number of Participants", fill = "Sex") + 
+  theme_classic()
+ggsave("Sex and ASD.jpg")
 ```
 
 ## Ethnicity
 
-```{r}
+```{r Ethnicity}
+#Ethnicity only
+#table
+dat_SDQ %>% 
+  count(ethnicity) %>% 
+  mutate(prop = n/sum(n))
 
+#Ethnicity and ASD
+#ASD group
+dat_SDQ %>% 
+  filter(ASD_final == "ASD") %>% 
+  count(ethnicity) %>% 
+  mutate(prop = n/sum(n))
+
+#non-ASD group
+dat_SDQ %>% 
+  filter(ASD_final == "Non-ASD") %>% 
+  count(ethnicity) %>% 
+  mutate(prop = n/sum(n))
+```
+
+## SDQ scores (total difficulty w2-w7)
+
+```{r Wave 2}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Diff2, na.rm = T), 
+                             sd_diff = sd(Diff2, na.rm = T), 
+                             min_diff = min(Diff2, na.rm = T), 
+                             max_diff = max(Diff2, na.rm = T), 
+                             mean_pro = mean(Diff2, na.rm = T), 
+                             sd_pro = sd(Diff2, na.rm = T), 
+                             min_pro = min(Diff2, na.rm = T), 
+                             max_pro = max(Diff2, na.rm = T))
+```
+
+```{r Wave 3}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Diff3, na.rm = T), 
+                             sd_diff = sd(Diff3, na.rm = T), 
+                             min_diff = min(Diff3, na.rm = T), 
+                             max_diff = max(Diff3, na.rm = T), 
+                             mean_pro = mean(Diff3, na.rm = T), 
+                             sd_pro = sd(Diff3, na.rm = T), 
+                             min_pro = min(Diff3, na.rm = T), 
+                             max_pro = max(Diff3, na.rm = T))
+```
+
+```{r Wave 4}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Diff4, na.rm = T), 
+                             sd_diff = sd(Diff4, na.rm = T), 
+                             min_diff = min(Diff4, na.rm = T), 
+                             max_diff = max(Diff4, na.rm = T), 
+                             mean_pro = mean(Diff4, na.rm = T), 
+                             sd_pro = sd(Diff4, na.rm = T), 
+                             min_pro = min(Diff4, na.rm = T), 
+                             max_pro = max(Diff4, na.rm = T))
+```
+
+```{r Wave 5}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Diff5, na.rm = T), 
+                             sd_diff = sd(Diff5, na.rm = T), 
+                             min_diff = min(Diff5, na.rm = T), 
+                             max_diff = max(Diff5, na.rm = T), 
+                             mean_pro = mean(Diff5, na.rm = T), 
+                             sd_pro = sd(Diff5, na.rm = T), 
+                             min_pro = min(Diff5, na.rm = T), 
+                             max_pro = max(Diff5, na.rm = T))
+```
+
+```{r Wave 6}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Diff6, na.rm = T), 
+                             sd_diff = sd(Diff6, na.rm = T), 
+                             min_diff = min(Diff6, na.rm = T), 
+                             max_diff = max(Diff6, na.rm = T), 
+                             mean_pro = mean(Diff6, na.rm = T), 
+                             sd_pro = sd(Diff6, na.rm = T), 
+                             min_pro = min(Diff6, na.rm = T), 
+                             max_pro = max(Diff6, na.rm = T))
+```
+
+```{r Wave 7}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Diff7, na.rm = T), 
+                             sd_diff = sd(Diff7, na.rm = T), 
+                             min_diff = min(Diff7, na.rm = T), 
+                             max_diff = max(Diff7, na.rm = T), 
+                             mean_pro = mean(Diff7, na.rm = T), 
+                             sd_pro = sd(Diff7, na.rm = T), 
+                             min_pro = min(Diff7, na.rm = T), 
+                             max_pro = max(Diff7, na.rm = T))
+```
+
+## SDQ scores (prosocial w2-w7)
+
+```{r Wave 2}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Prosocial2, na.rm = T), 
+                             sd_diff = sd(Prosocial2, na.rm = T), 
+                             min_diff = min(Prosocial2, na.rm = T), 
+                             max_diff = max(Prosocial2, na.rm = T), 
+                             mean_pro = mean(Prosocial2, na.rm = T), 
+                             sd_pro = sd(Prosocial2, na.rm = T), 
+                             min_pro = min(Prosocial2, na.rm = T), 
+                             max_pro = max(Prosocial2, na.rm = T))
+```
+
+```{r Wave 3}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Prosocial3, na.rm = T), 
+                             sd_diff = sd(Prosocial3, na.rm = T), 
+                             min_diff = min(Prosocial3, na.rm = T), 
+                             max_diff = max(Prosocial3, na.rm = T), 
+                             mean_pro = mean(Prosocial3, na.rm = T), 
+                             sd_pro = sd(Prosocial3, na.rm = T), 
+                             min_pro = min(Prosocial3, na.rm = T), 
+                             max_pro = max(Prosocial3, na.rm = T))
+```
+
+```{r Wave 4}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Prosocial4, na.rm = T), 
+                             sd_diff = sd(Prosocial4, na.rm = T), 
+                             min_diff = min(Prosocial4, na.rm = T), 
+                             max_diff = max(Prosocial4, na.rm = T), 
+                             mean_pro = mean(Prosocial4, na.rm = T), 
+                             sd_pro = sd(Prosocial4, na.rm = T), 
+                             min_pro = min(Prosocial4, na.rm = T), 
+                             max_pro = max(Prosocial4, na.rm = T))
+```
+
+```{r Wave 5}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Prosocial5, na.rm = T), 
+                             sd_diff = sd(Prosocial5, na.rm = T), 
+                             min_diff = min(Prosocial5, na.rm = T), 
+                             max_diff = max(Prosocial5, na.rm = T), 
+                             mean_pro = mean(Prosocial5, na.rm = T), 
+                             sd_pro = sd(Prosocial5, na.rm = T), 
+                             min_pro = min(Prosocial5, na.rm = T), 
+                             max_pro = max(Prosocial5, na.rm = T))
+```
+
+```{r Wave 6}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Prosocial6, na.rm = T), 
+                             sd_diff = sd(Prosocial6, na.rm = T), 
+                             min_diff = min(Prosocial6, na.rm = T), 
+                             max_diff = max(Prosocial6, na.rm = T), 
+                             mean_pro = mean(Prosocial6, na.rm = T), 
+                             sd_pro = sd(Prosocial6, na.rm = T), 
+                             min_pro = min(Prosocial6, na.rm = T), 
+                             max_pro = max(Prosocial6, na.rm = T))
+```
+
+```{r Wave 7}
+dat_SDQ %>% 
+  summarise(mean_diff = mean(Prosocial7, na.rm = T), 
+                             sd_diff = sd(Prosocial7, na.rm = T), 
+                             min_diff = min(Prosocial7, na.rm = T), 
+                             max_diff = max(Prosocial7, na.rm = T), 
+                             mean_pro = mean(Prosocial7, na.rm = T), 
+                             sd_pro = sd(Prosocial7, na.rm = T), 
+                             min_pro = min(Prosocial7, na.rm = T), 
+                             max_pro = max(Prosocial7, na.rm = T))
 ```
 
 # Basic statsitical tests
@@ -540,19 +782,261 @@ dat_SDQ |> count(Exter7)
 ## Grouping differences (sex vs ASD)
 
 ```{r}
+results_chi <- chisq.test(x = dat_SDQ %>% pull(sex_final), # 1st grouping variable
+                      y = dat_SDQ %>% pull(ASD_final), # 2nd grouping variable
+                      correct = T) %>% # df=1, continuity correction
+  tidy()
 
+results
+#chi(1) = 159.4939, p<.001
+
+Phi <- cramersV(x = dat_SDQ %>% pull(sex_final), 
+                     y = dat_SDQ %>% pull(ASD_final), 
+                     correct = T)
+Phi
+#Phi φ = .10
 ```
 
-## t-tests (total difficulty w2-w7)
+## t-tests (Total Difficulty and Prosocial)
 
-```{r}
+```{r Wave 2}
+#ASD vs non-ASD differences in parental SDQ scores
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Diff2), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Diff2), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Diff2), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Diff2), 
+        method = "unequal")
 
+#t(521.646) = 13.44896, p<.001, [3.26, 4.37], d = .66 (medium effect)
+
+#ASD vs non-ASD differences in parental SDQ prosocial
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Prosocial2), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Prosocial2), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Prosocial2), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Prosocial2), 
+        method = "unequal")
+
+#t(528.5708) = -10.27958, p<.001, [-1.31, -.89], d = .52 (medium effect)
 ```
 
-## t-tests (prosocial w2-w7)
+```{r Wave 3}
+#ASD vs non-ASD differences in parental SDQ scores
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Diff3), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Diff3), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Diff3), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Diff3), 
+        method = "unequal")
 
-```{r}
+#t(565.2985) = 20.26116, p<.001, [5.38, 6.54], d = 1.01 (large effect)
 
+#ASD vs non-ASD differences in parental SDQ prosocial
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Prosocial3), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Prosocial3), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Prosocial3), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Prosocial3), 
+        method = "unequal")
+
+#t(567.1602) = -13.3991, p<.001, [-1.57, -1.17], d = .67 (medium effect)
+```
+
+```{r Wave 4}
+#ASD vs non-ASD differences in parental SDQ scores
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Diff4), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Diff4), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Diff4), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Diff4), 
+        method = "unequal")
+
+#t(542.6737) = 24.69587, p<.001, [7.44, 8.72], d = 1.27 (large effect)
+
+#ASD vs non-ASD differences in parental SDQ prosocial
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Prosocial4), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Prosocial4), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Prosocial4), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Prosocial4), 
+        method = "unequal")
+
+#t(542.5182) = -15.70134, p<.001, [-1.91, -1.49], d = .82 (large effect)
+```
+
+```{r Wave 5}
+#ASD vs non-ASD differences in parental SDQ scores
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Diff5), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Diff5), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Diff5), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Diff5), 
+        method = "unequal")
+
+#t(485.659) = 28.44564, p<.001, [9.45, 10.85], d = 1.55 (large effect)
+
+#ASD vs non-ASD differences in parental SDQ prosocial
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Prosocial5), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Prosocial5), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Prosocial5), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Prosocial5), 
+        method = "unequal")
+
+#t(540.1155) = -17.01301, p<.001, [-2.00, -1.58], d = .90 (large effect)
+```
+
+```{r Wave 6}
+#ASD vs non-ASD differences in parental SDQ scores
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Diff6), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Diff6), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Diff6), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Diff6), 
+        method = "unequal")
+
+#t(494.8745) = 26.90292, p<.001, [8.91, 10.32], d = 1.43 (large effect)
+
+#ASD vs non-ASD differences in parental SDQ prosocial
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Prosocial6), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Prosocial6), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Prosocial6), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Prosocial6), 
+        method = "unequal")
+
+#t(496.8828) = -16.35652, p<.001, [-2.09, -1.64], d = .87 (large effect)
+```
+
+```{r Wave 7}
+#ASD vs non-ASD differences in parental SDQ scores
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Diff7), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Diff7), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Diff7), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Diff7), 
+        method = "unequal")
+
+#t(392.1733) = 22.08333, p<.001, [8.13, 9.72], d = 1.33 (large effect)
+
+#ASD vs non-ASD differences in parental SDQ prosocial
+t.test(dat_SDQ %>% 
+         filter(ASD_final == "ASD") %>% 
+         pull(Prosocial7), 
+       dat_SDQ %>% 
+         filter(ASD_final == "Non-ASD") %>% 
+         pull(Prosocial7), 
+       paired = F) %>% 
+  tidy()
+cohensD(dat_SDQ %>% 
+          filter(ASD_final == "ASD") %>% 
+          pull(Prosocial7), 
+        dat_SDQ %>% 
+          filter(ASD_final == "Non-ASD") %>% 
+          pull(Prosocial7), 
+        method = "unequal")
+
+#t(392.3951) = -14.15916, p<.001, [-2.06, -1.56], d = .85 (large effect)
 ```
 
 # RI-CLPM
