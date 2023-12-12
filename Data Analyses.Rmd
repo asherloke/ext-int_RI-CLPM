@@ -8,3 +8,551 @@ date: "2023-12-06"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Set up
+
+```{r Packages and Loading Data}
+library(tidyverse)
+library(lsr)
+library(broom)
+library(lavaan)
+library(semPlot)
+library(semTools)
+MCS <- read.csv("MCS.csv")
+```
+
+# Data wrangling
+
+## Variable Selection
+
+```{r Variable Selection}
+#we start by selecting variables we want (or in this case disselecting variables we don't want)
+data <- MCS %>% select(-CNUM00, -Number_CMs_1, -Academic_Qual_Highest_1, -Banded_NETInc_LoneParent_1, -Banded_NETInc_Couple_1, -Total_Income_Couple_2, -Total_Income_LP_2, -Total_Joint_Income_3, -Total_Income_3, -Freq_DistSleep_Wheez_CM_2, -Freq_DisturbedSleep_Wheezing_3, -Freq_DisturbedSleep_Wheezing_4, -Freq_DisturbedSleep_Wheezing_5, -w6_Sleep_school_night, -w6_Wake_school_day, -w6_Sleep_no_school, -w6_Wake_no_school, -w6_how_long_sleep, -w6_how_awake_night, -w7_sleep_qual, -IQ3, -IQ4)
+```
+
+## Recoding and Variable Renaming
+
+We then need to insert NAs where they should be and recode the categorical numbers with letters so they make more sense. We also rename the variables here so it is less confusing.
+
+**Ethnicity**
+
+```{r Ethnicity_11cat_1}
+#we first deal with ethnicity
+data %>% count(Ethnicity_11cat_1) #see original data and what we need to recode
+data_eth <- data %>% 
+  mutate(ethnicity = na_if(Ethnicity_11cat_1, -1)) %>%
+  mutate(ethnicity = na_if(ethnicity, -8)) %>%
+  mutate(ethnicity = na_if(ethnicity, -9))
+data_eth %>% count(ethnicity) #see if it worked
+#yes it worked
+
+data_eth <- data_eth %>%
+  mutate(ethnicity = recode(ethnicity, 
+                            "1" = "White",
+                            "2" = "Mixed", 
+                            "3" = "Indian", 
+                            "4" = "Pakistani",
+                            "5" = "Bangladeshi",
+                            "6" = "Other Asian",
+                            "7" = "Black Caribbean",
+                            "8" = "Black African", 
+                            "9" = "Other Black", 
+                            "10" = "Chinese", 
+                            "11" = "Other Ethnic Group")) %>% #this is taken from 11cat ethnicity questionnaire
+  select(-Ethnicity_11cat_1)
+
+#check that there should be 752 NAs
+data_eth %>% count(ethnicity) #yes, it worked.
+```
+
+**Sex**
+
+```{r CM_Sex_3}
+#then we deal with sex (there are 2 sex variables so we will deal with them seperately)
+
+#first sex 3
+data_eth %>% count(CM_Sex_3) #see original data and what we need to recode
+data_sex3 <- data_eth %>% 
+  mutate(sex3 = recode(CM_Sex_3, 
+                       "1" = "Male",
+                       "2" = "Female")) %>% #this is taken from BSEX questionnaire
+  select(-CM_Sex_3)
+
+#check that there should be 4008 NAs
+data_sex3 %>% count(sex3) #yes, it worked.
+```
+
+```{r Sex_CM_4}
+#then sex 4
+data_sex3 %>% count(Sex_CM_4) #see original data and what we need to recode
+#there is -1. From convention I assume this is -1
+
+data_sex <- data_sex3 %>% 
+  mutate(sex4 = na_if(Sex_CM_4, -1))
+data_sex %>% count(sex4) #see if it worked
+#yes it worked
+
+data_sex <- data_sex %>%
+  mutate(sex4 = recode(sex4, 
+                       "1" = "Male",
+                       "2" = "Female")) %>% #this is taken from BSEX questionnaire
+  select(-Sex_CM_4)
+
+#check that there should be 6187 NAs
+data_sex %>% count(sex4) #yes, it worked.
+```
+
+We need to deal with the two repeated sex columns.
+
+```{r Combining Sex Columns}
+data_sex_combined <- data_sex %>% 
+  unite("Sex_Com", 
+        sex3:sex4, 
+        sep = "", 
+        remove = F, 
+        na.rm = T) #create column called Sex_Com, take sex3 and sex4, with no seperation, do not remove columns, ignore NAs
+
+data_sex_combined %>% count(Sex_Com) #see what the values look like
+
+data_sex_final <- data_sex_combined %>%
+  mutate(sex_final = recode(Sex_Com, 
+                            "Male" = "Male", 
+                            "MaleMale" = "Male", 
+                            "Female" = "Female", 
+                            "FemaleFemale" = "Female", 
+                            "FemaleMale" = "Male")) %>% #recode the combined columns, later gender information from MCS4 was taken in the event of discrepant gender information
+  mutate(sex_final = na_if(sex_final, "")) %>% #make blanks NAs (they were blank cause I told unite to ignore NAs)
+  select(-sex3, -sex4, -Sex_Com)
+
+data_sex_final %>% count(sex_final) #values all correspond
+```
+
+**ASD**
+
+ASD diagnoses was measured at waves 3,4, 5 and 6. If they were ever diagnosed with ASD, I want to consider them as ASD.
+
+Before we rename the values and complicate matters, lets first combine all ASD columns.
+
+```{r ASD}
+#insert NAs
+
+#wave 3
+
+#first lets view the data
+data_sex_final %>% count(Autism_Diagnosis_3)
+data_ASD3 <- data_sex_final %>% 
+  mutate(ASD3 = na_if(Autism_Diagnosis_3, -1)) %>%
+  mutate(ASD3 = na_if(ASD3, -8)) %>%
+  mutate(ASD3 = na_if(ASD3, -9))
+data_ASD3 %>% count(ASD3) #see if it worked
+#yes it worked
+
+#wave 4
+
+#first lets view the data
+data_ASD3 %>% count(Autism_Diagnosis_4)
+data_ASD4 <- data_ASD3 %>% 
+  mutate(ASD4 = na_if(Autism_Diagnosis_4, -1)) %>%
+  mutate(ASD4 = na_if(ASD4, -8)) %>%
+  mutate(ASD4 = na_if(ASD4, -9))
+data_ASD4 %>% count(ASD4) #see if it worked
+#yes it worked
+
+#wave 5
+
+#first lets view the data
+data_ASD4 %>% count(Autism_Diagnosis_5)
+data_ASD5 <- data_ASD4 %>% 
+  mutate(ASD5 = na_if(Autism_Diagnosis_5, -1)) %>%
+  mutate(ASD5 = na_if(ASD5, -8)) %>%
+  mutate(ASD5 = na_if(ASD5, -9))
+data_ASD5 %>% count(ASD5) #see if it worked
+#yes it worked
+
+#wave 6
+
+#first lets view the data
+data_ASD5 %>% count(Autism_Diagnosis_6)
+data_ASD6 <- data_ASD5 %>% 
+  mutate(ASD6 = na_if(Autism_Diagnosis_6, -1)) %>%
+  mutate(ASD6 = na_if(ASD6, -8)) %>%
+  mutate(ASD6 = na_if(ASD6, -9))
+data_ASD6 %>% count(ASD6) #see if it worked
+#yes it worked
+
+#combine dataframes
+data_ASD_combined <- data_ASD6 %>% 
+  unite("ASD_Com", 
+        ASD3:ASD6, 
+        sep = "", 
+        remove = F, 
+        na.rm = T) #create column called ASD_Com, take ASD3:ASD6, with no seperation, do not remove columns, ignore NAs
+```
+
+After combining ASD columns, we can now recode them.
+
+``` {r ASD recoding 1s and 2s}
+data_ASD_combined %>% count(ASD_Com) #see what the values look like
+
+data_ASD_final <- data_ASD_combined %>%
+  mutate(ASD_final = recode(ASD_Com, 
+                            "1" = "ASD", 
+                            "11" = "ASD", 
+                            "111" = "ASD", 
+                            "112" = "ASD", 
+                            "12" = "ASD", 
+                            "121" = "ASD", 
+                            "122" = "ASD", 
+                            "1221" = "ASD",
+                            "1222" = "ASD", 
+                            "2" = "Non-ASD", 
+                            "21" = "ASD", 
+                            "211" = "ASD", 
+                            "212" = "ASD", 
+                            "22" = "Non-ASD", 
+                            "221" = "ASD",
+                            "2211" = "ASD", 
+                            "2212" = "ASD", 
+                            "222" = "Non-ASD", 
+                            "2221" = "ASD", 
+                            "2222" = "Non-ASD")) %>% #recode the combined columns
+  mutate(ASD_final = na_if(ASD_final, "")) %>% #make blanks NAs (they were blank cause I told unite to ignore NAs)
+  select(-ASD3, 
+         -ASD4, 
+         -ASD5, 
+         -ASD6, 
+         -Autism_Diagnosis_3, 
+         -Autism_Diagnosis_4, 
+         -Autism_Diagnosis_5, 
+         -Autism_Diagnosis_6,
+         -ASD_Com)
+
+data_ASD_final %>% count(ASD_final) #values all correspond
+```
+
+We don't want NA values in ASD (this is tolerable in sex as it isn't our variable of comparison)
+
+```{r Remove NA}
+data_ASD_final <- data_ASD_final %>% drop_na(ASD_final)
+```
+
+## SDQ
+
+Subscale scores available for waves 2-7 apart from wave 5 with only specific item scores. For each wave, need to
+- Find out how many NAs, and recode -1 as NAs
+- Create Internalising and Externalising scores
+
+### Wave 2
+
+```{r Wave 2}
+dat_SDQ <- data_ASD_final %>%
+  mutate(Emotional2 = na_if(Emotional_SDQ_2, -1),
+         Conduct2 = na_if(Conduct_SDQ_2, -1),
+         Hyper2 = na_if(HyperInattent_SDQ_2, -1),
+         Peer2 = na_if(PeerProb_SDQ_2, -1),
+         Prosocial2 = na_if(Prosocial_SDQ_2, -1)) %>% #-1 as NAs
+  mutate(Inter2 = if_else(is.na(Emotional2) | is.na(Peer2), NA, Emotional2 + Peer2),
+         Exter2 = if_else(is.na(Conduct2) | is.na(Hyper2), NA, Conduct2 + Hyper2)
+         ) #Creating Internalising and Externalising Scores
+
+#check
+dat_SDQ |> count(Emotional2)
+dat_SDQ |> count(Conduct2)
+dat_SDQ |> count(Hyper2)
+dat_SDQ |> count(Peer2)
+dat_SDQ |> count(Prosocial2)
+dat_SDQ |> count(Inter2)
+dat_SDQ |> count(Exter2)
+```
+
+### Wave 3
+
+```{r Wave 3}
+dat_SDQ <- dat_SDQ %>%
+  mutate(Emotional3 = na_if(Emotional_SDQ_3, -1),
+         Conduct3 = na_if(Conduct_SDQ_3, -1),
+         Hyper3 = na_if(HyperInattent_SDQ_3, -1),
+         Peer3 = na_if(PeerProb_SDQ_3, -1),
+         Prosocial3 = na_if(Prosocial_SDQ_3, -1)) %>% #-1 as NAs
+  mutate(Inter3 = if_else(is.na(Emotional3) | is.na(Peer3), NA, Emotional3 + Peer3),
+         Exter3 = if_else(is.na(Conduct3) | is.na(Hyper3), NA, Conduct3 + Hyper3)
+         ) #Creating Internalising and Externalising Scores
+
+#check
+dat_SDQ |> count(Emotional3)
+dat_SDQ |> count(Conduct3)
+dat_SDQ |> count(Hyper3)
+dat_SDQ |> count(Peer3)
+dat_SDQ |> count(Prosocial3)
+dat_SDQ |> count(Inter3)
+dat_SDQ |> count(Exter3)
+```
+
+### Wave 4
+
+```{r}
+dat_SDQ <- dat_SDQ %>%
+  mutate(Emotional4 = na_if(Emotional_SDQ_4, -1),
+         Conduct4 = na_if(Conduct_SDQ_4, -1),
+         Hyper4 = na_if(HyperInattent_SDQ_4, -1),
+         Peer4 = na_if(PeerProb_SDQ_4, -1),
+         Prosocial4 = na_if(Prosocial_SDQ_4, -1)) %>% #-1 as NAs
+  mutate(Inter4 = if_else(is.na(Emotional4) | is.na(Peer4), NA, Emotional4 + Peer4),
+         Exter4 = if_else(is.na(Conduct4) | is.na(Hyper4), NA, Conduct4 + Hyper4)
+         ) #Creating Internalising and Externalising Scores
+
+#check
+dat_SDQ |> count(Emotional4)
+dat_SDQ |> count(Conduct4)
+dat_SDQ |> count(Hyper4)
+dat_SDQ |> count(Peer4)
+dat_SDQ |> count(Prosocial4)
+dat_SDQ |> count(Inter4)
+dat_SDQ |> count(Exter4)
+```
+
+### Wave 5
+
+The items load onto the factors as follows
+Emotional problems scale: Items 3, 8, 13, 16, 24
+Conduct problems scale: Items 5, 7, 12, 18, 22
+Hyperactivity scale: Items 2, 10, 15, 21, 25
+Peer problems scale: Items 6, 11, 14, 19, 23
+Prosocial scale: Items 1, 4, 9, 17, 20
+
+```{r}
+#parent report items
+dat_SDQ_1 <- dat_SDQ %>% 
+  pivot_longer(c(P_w5_SDQ_01:P_w5_SDQ_25), names_to = "item", values_to = "score") #make long form to deal with everything easily
+
+#view data
+dat_SDQ_1 %>% count(score)
+
+#scores consist of -1, 1, 2, 3, 4. I assume 1 corresponds to 0, 2 corresponds to 1, 3 corresponds to 2, 4 corresponds to NA, -1 corresponds to missing.
+
+#make -1 and 4 into NAs
+dat_SDQ_2 <- dat_SDQ_1 %>%
+  mutate(score = na_if(score, -1)) %>%
+  mutate(score = na_if(score, 4))
+
+rm(dat_SDQ_1)
+
+#check
+dat_SDQ_2 %>% count(score)
+
+#now make 1, 2, 3, into 0, 1, 2.
+dat_SDQ_2 <- dat_SDQ_2 %>%
+  mutate(score = recode(score,
+                        "1" = 0,
+                        "2" = 1,
+                        "3" = 2))
+
+#reverse score items 7, 11, 14, 21, 25
+data_w5_parent_positive <- dat_SDQ_2 %>%
+  filter(item != "P_w5_SDQ_07" & 
+           item != "P_w5_SDQ_11" & 
+           item != "P_w5_SDQ_14" & 
+           item != "P_w5_SDQ_21" & 
+           item != "P_w5_SDQ_25"
+         )
+
+data_w5_parent_reverse <- dat_SDQ_2 %>%
+  filter(item == "P_w5_SDQ_07" | 
+           item == "P_w5_SDQ_11" | 
+           item == "P_w5_SDQ_14" | 
+           item == "P_w5_SDQ_21" | 
+           item == "P_w5_SDQ_25"
+         )
+
+data_w5_parent_reverse %>% count(score)
+
+#now make 0, 1, 2, into 2, 1, 0.
+data_w5_parent_reverse <- data_w5_parent_reverse %>%
+  mutate(score = recode(score,
+                        "0" = 2,
+                        "1" = 1,
+                        "2" = 0))
+
+data_w5_parent_reverse %>% count(score)
+
+#join back
+data_w5_parent <- bind_rows(data_w5_parent_positive, data_w5_parent_reverse)
+
+rm(data_w5_parent_positive)
+rm(data_w5_parent_reverse)
+rm(dat_SDQ_2)
+
+#check
+data_w5_parent %>% count(score)
+
+#looks good.
+
+dat_SDQ <- data_w5_parent %>% 
+  pivot_wider(names_from = item, values_from = score) #revert to short form
+
+rm(data_w5_parent)
+
+dat_SDQ <- dat_SDQ %>%
+  mutate(Emotional5 = if_else(is.na(P_w5_SDQ_03) |
+                                is.na(P_w5_SDQ_08) |
+                                is.na(P_w5_SDQ_13) |
+                                is.na(P_w5_SDQ_16) |
+                                is.na(P_w5_SDQ_24),
+                              NA,
+                              P_w5_SDQ_03 + 
+                                P_w5_SDQ_08 + 
+                                P_w5_SDQ_13 + 
+                                P_w5_SDQ_16 + 
+                                P_w5_SDQ_24),
+         Conduct5 = if_else(is.na(P_w5_SDQ_05) |
+                                is.na(P_w5_SDQ_07) |
+                                is.na(P_w5_SDQ_12) |
+                                is.na(P_w5_SDQ_18) |
+                                is.na(P_w5_SDQ_22),
+                            NA, 
+                            P_w5_SDQ_05 + 
+                              P_w5_SDQ_07 + 
+                              P_w5_SDQ_12 + 
+                              P_w5_SDQ_18 + 
+                              P_w5_SDQ_22),
+         Hyper5 = if_else(is.na(P_w5_SDQ_02) |
+                                is.na(P_w5_SDQ_10) |
+                                is.na(P_w5_SDQ_15) |
+                                is.na(P_w5_SDQ_21) |
+                                is.na(P_w5_SDQ_25), 
+                          NA,
+                          P_w5_SDQ_02 + 
+                            P_w5_SDQ_10 + 
+                            P_w5_SDQ_15 + 
+                            P_w5_SDQ_21 + 
+                            P_w5_SDQ_25),
+         Peer5 = if_else(is.na(P_w5_SDQ_06) |
+                                is.na(P_w5_SDQ_11) |
+                                is.na(P_w5_SDQ_14) |
+                                is.na(P_w5_SDQ_19) |
+                                is.na(P_w5_SDQ_23),
+                         NA,
+                         P_w5_SDQ_06 + 
+                           P_w5_SDQ_11 + 
+                           P_w5_SDQ_14 + 
+                           P_w5_SDQ_19 + 
+                           P_w5_SDQ_23),
+         Prosocial5 = if_else(is.na(P_w5_SDQ_01) |
+                                is.na(P_w5_SDQ_04) |
+                                is.na(P_w5_SDQ_09) |
+                                is.na(P_w5_SDQ_17) |
+                                is.na(P_w5_SDQ_20),
+                              NA,
+                              P_w5_SDQ_01 + 
+                                P_w5_SDQ_04 + 
+                                P_w5_SDQ_09 + 
+                                P_w5_SDQ_17 + 
+                                P_w5_SDQ_20)) %>%
+  mutate(Inter5 = if_else(is.na(Emotional5) | is.na(Peer5), NA, Emotional5 + Peer5),
+         Exter5 = if_else(is.na(Conduct5) | is.na(Hyper5), NA, Conduct5 + Hyper5)
+         ) #Creating Internalising and Externalising Scores
+
+#check
+dat_SDQ |> count(Emotional5)
+dat_SDQ |> count(Conduct5)
+dat_SDQ |> count(Hyper5)
+dat_SDQ |> count(Peer5)
+dat_SDQ |> count(Prosocial5)
+dat_SDQ |> count(Inter5)
+dat_SDQ |> count(Exter5)
+```
+
+### Wave 6
+
+```{r}
+dat_SDQ <- dat_SDQ %>%
+  mutate(Emotional6 = na_if(Emotional_P_SDQ_6, -1),
+         Conduct6 = na_if(Conduct_P_SDQ_6, -1),
+         Hyper6 = na_if(Hyper_P_SDQ_6, -1),
+         Peer6 = na_if(PeerProb_P_SDQ_6, -1),
+         Prosocial6 = na_if(Prosocial_P_SDQ_6, -1)) %>% #-1 as NAs
+  mutate(Inter6 = if_else(is.na(Emotional6) | is.na(Peer6), NA, Emotional6 + Peer6),
+         Exter6 = if_else(is.na(Conduct6) | is.na(Hyper6), NA, Conduct6 + Hyper6)
+         ) #Creating Internalising and Externalising Scores
+
+#check
+dat_SDQ |> count(Emotional6)
+dat_SDQ |> count(Conduct6)
+dat_SDQ |> count(Hyper6)
+dat_SDQ |> count(Peer6)
+dat_SDQ |> count(Prosocial6)
+dat_SDQ |> count(Inter6)
+dat_SDQ |> count(Exter6)
+```
+
+### Wave 7
+
+```{r}
+dat_SDQ <- dat_SDQ %>%
+  mutate(Emotional7 = na_if(Emotional_P_SDQ_7, -1),
+         Conduct7 = na_if(Conduct_P_SDQ_7, -1),
+         Hyper7 = na_if(Hyper_P_SDQ_7, -1),
+         Peer7 = na_if(PeerProb_P_SDQ_7, -1),
+         Prosocial7 = na_if(Prosocial_P_SDQ_7, -1)) %>% #-1 as NAs
+  mutate(Inter7 = if_else(is.na(Emotional7) | is.na(Peer7), NA, Emotional7 + Peer7),
+         Exter7 = if_else(is.na(Conduct7) | is.na(Hyper7), NA, Conduct7 + Hyper7)
+         ) #Creating Internalising and Externalising Scores
+
+#check
+dat_SDQ |> count(Emotional7)
+dat_SDQ |> count(Conduct7)
+dat_SDQ |> count(Hyper7)
+dat_SDQ |> count(Peer7)
+dat_SDQ |> count(Prosocial7)
+dat_SDQ |> count(Inter7)
+dat_SDQ |> count(Exter7)
+
+##sum(is.na(dat_SDQ$Total_P_SDQ_7) == is.na(dat_SDQ$Emotional7))
+```
+
+# Descriptive Stats
+
+## ASD
+
+```{r}
+
+```
+
+## Sex
+
+```{r}
+
+```
+
+## Sex and ASD
+
+```{r}
+
+```
+
+## Ethnicity
+
+```{r}
+
+```
+
+# Basic statsitical tests
+
+## Grouping differences (sex vs ASD)
+
+```{r}
+
+```
+
+## t-tests (total difficulty w2-w7)
+
+```{r}
+
+```
+
+## t-tests (prosocial w2-w7)
+
+```{r}
+
+```
+
+# RI-CLPM
