@@ -1370,7 +1370,7 @@ t(392.3951) = -14.15916, p<.001, [-2.06, -1.56], d = .85 (large effect)
 
 mod1: cfi = .987, RMSEA = .039, SRMR = .038
 mod2 v1: cfi = .985, RMSEA = .041, SRMR = .042
-mod2 v2 (constrained lagged regression coefficients): #cfi = .987, RMSEA = .034, SRMR = .035
+mod2 v2 (constrained lagged regression coefficients): cfi = .987, RMSEA = .034, SRMR = .035
 mod3: cfi = .990, RMSEA = .037, SRMR = .029
 mod4: cfi = .988, RMSEA = .036, SRMR = .035
 
