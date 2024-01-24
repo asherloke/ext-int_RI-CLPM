@@ -1367,7 +1367,7 @@ RICLPM_mod1_ext <- '
   # Constrain covariance of between factors and exogenous within factors to 0 
   RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
 '
-RICLPM1_mod1_ext.fit <- cfa(RICLPM_mod1_ext, 
+RICLPM1_mod1_ext.fit <- sem(RICLPM_mod1_ext, 
   data = dat_SDQ, 
   missing = 'ML'
 )
@@ -1380,15 +1380,14 @@ summary(RICLPM1_mod1_ext.fit, standardized = T, fit.measures = T)
 Group constraints. There are 2 ways to do this.
 
 ```{r mod2 version 1}
-RICLPM_mod2_ext.fit <- cfa(RICLPM_mod1_ext,
+RICLPM_mod2_ext.fit <- sem(RICLPM_mod1_ext,
   data = dat_SDQ, 
   missing = "ML", 
-  group = "ASD_final",
-  meanstructure = T, 
-  int.ov.free = T
+  group = "ASD_final"
 )
-summary(RICLPM_mod2.fit, standardized = T, fit.measures = T)
-#cfi = .985, RMSEA = .041, SRMR = .053
+summary(RICLPM_mod2_ext.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM_mod2_ext.fit, "cov.lv")
+#cfi = .968, RMSEA = .033, SRMR = .025
 ```
 
 ```{r mod2 version 2}
@@ -1457,14 +1456,13 @@ RICLPM_mod2_ext <- '
   # Constrain covariance of between factors and exogenous within factors to 0 
   RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
 '
-RICLPM1_mod2_ext_alt.fit <- cfa(RICLPM_mod2_ext, 
+RICLPM1_mod2_ext_alt.fit <- sem(RICLPM_mod2_ext, 
   data = dat_SDQ, 
   missing = 'ML',
-  grou = "ASD_final",
-  meanstructure = T, 
-  int.ov.free = T
+  group = "ASD_final"
 )
 summary(RICLPM1_mod2_ext_alt.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM1_mod2_ext_alt.fit, "cov.lv")
 #cfi = .967, RMSEA = .033, SRMR = .027
 ```
 
@@ -1483,12 +1481,13 @@ dat_SDQ_ASD <- dat_SDQ %>%
 ```
 
 ```{r mod3 fitting}
-RICLPM_mod3.fit <- lavaan(RICLPM_mod1_ext,
+RICLPM_mod3_ext.fit <- sem(RICLPM_mod1_ext,
   data = dat_SDQ_ASD, 
   missing = "ML"
 )
-summary(RICLPM_mod3.fit, standardized = T, fit.measures = T)
-#cfi = .990, RMSEA = .037, SRMR = .029
+summary(RICLPM_mod3_ext.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM_mod3_ext.fit, "cov.lv")
+#cfi = .950, RMSEA = .048, SRMR = .043
 ```
 
 ## mod4: version of mod 1 for non-ASD group only
@@ -1499,14 +1498,12 @@ dat_SDQ_nonASD <- dat_SDQ %>%
 ```
 
 ```{r mod4 fitting}
-RICLPM_mod4.fit <- lavaan(RICLPM_mod1_ext,
+RICLPM_mod4_ext.fit <- sem(RICLPM_mod1_ext,
   data = dat_SDQ_nonASD, 
-  missing = "ML", 
-  meanstructure = T, 
-  int.ov.free = T
+  missing = "ML"
 )
-summary(RICLPM_mod4.fit, standardized = T, fit.measures = T)
-#cfi = .988, RMSEA = .036, SRMR = .035
+summary(RICLPM_mod4_ext.fit, standardized = T, fit.measures = T)
+#cfi = .969, RMSEA = .033, SRMR = .042
 ```
 
 ## Results
@@ -1587,3 +1584,22 @@ Chi-Squared Difference Test
 RICLPM.fit          37 699062 699470  951.67                                           
 RICLPM_mod2.fit     74 695688 696504 1061.43     109.76 0.010995      37  3.903e-09 ***
 RICLPM_mod2_alt.fit 94 695543 696205  956.54    -104.90 0.000000      20          1    
+
+### Multiple-indicator RI-CLPM fit indices
+
+mod1: cfi = .970, RMSEA = .034, SRMR = .025
+mod2 v1: cfi = .968, RMSEA = .033, SRMR = .025
+mod2 v2: cfi = .967, RMSEA = .033, SRMR = .027
+mod3: cfi = .950, RMSEA = .048, SRMR = .043
+mod4: cfi = .969, RMSEA = .033, SRMR = .042
+
+Chi-Squared Difference Test
+
+                          Df     AIC     BIC  Chisq Chisq diff    RMSEA Df diff Pr(>Chisq)
+RICLPM1_mod1_ext.fit     216 1086915 1087746 4303.2                                       
+RICLPM_mod2_ext.fit      432 1081521 1083184 4328.1     24.965 0.000000     216          1
+RICLPM1_mod2_ext_alt.fit 452 1081633 1083142 4480.2    152.058 0.020144      20     <2e-16
+                            
+RICLPM1_mod1_ext.fit        
+RICLPM_mod2_ext.fit         
+RICLPM1_mod2_ext_alt.fit ***
