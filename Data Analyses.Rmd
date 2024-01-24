@@ -1261,7 +1261,7 @@ summary(RICLPM_mod2_alt.fit, standardized = T, fit.measures = T)
 ## Comparisons
 
 ```{r Comparisons}
-comp_fit <- compareFit(RICLPM.fit, RICLPM_mod2.fit, RICLPM_mod2_alt.fit) # improvement although constrained lagged regression coefficients?
+comp_fit <- compareFit(RICLPM_mod1.fit, RICLPM_mod2.fit, RICLPM_mod2_alt.fit) # improvement although constrained lagged regression coefficients?
 summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
 ```
 
@@ -1292,6 +1292,214 @@ dat_SDQ_nonASD <- dat_SDQ %>%
 
 ```{r mod4 fitting}
 RICLPM_mod4.fit <- lavaan(RICLPM_mod1,
+  data = dat_SDQ_nonASD, 
+  missing = "ML", 
+  meanstructure = T, 
+  int.ov.free = T
+)
+summary(RICLPM_mod4.fit, standardized = T, fit.measures = T)
+#cfi = .988, RMSEA = .036, SRMR = .035
+```
+
+# Multiple-Indicator
+
+RI-CLPM (multiple-indicator versin) is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
+
+## mod1
+
+```{r mod1: basic model for both ASD and non-ASD}
+RICLPM_mod1_ext <- '
+  
+  ################
+  # BETWEEN PART #
+  ################
+  
+  # Create between factors (random intercepts) for each indicator separately
+  RI_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
+  RI_Hyper =~ 1*Hyper2 + 1*Hyper3 + 1*Hyper4 + 1*Hyper5 + 1*Hyper6 + 1*Hyper7
+  
+  RI_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
+  RI_Peer =~ 1*Peer2 + 1*Peer3 + 1*Peer4 + 1*Peer5 + 1*Peer6 + 1*Peer7
+  
+  ##################################
+  # WITHIN PART: MEASUREMENT MODEL #
+  ##################################
+  
+  # Factor models for X at 5 waves
+  Ext2_F =~ Conduct2 + Hyper2
+  Ext3_F =~ Conduct3 + Hyper3
+  Ext4_F =~ Conduct4 + Hyper4
+  Ext5_F =~ Conduct5 + Hyper5
+  Ext6_F =~ Conduct6 + Hyper6
+  Ext7_F =~ Conduct7 + Hyper7
+  
+  # Factor models for Y at 5 waves
+  Int2_F =~ Emotional2 + Peer2
+  Int3_F =~ Emotional3 + Peer3
+  Int4_F =~ Emotional4 + Peer4
+  Int5_F =~ Emotional5 + Peer5
+  Int6_F =~ Emotional6 + Peer6
+  Int7_F =~ Emotional7 + Peer7
+  
+  #########################
+  # WITHIN PART: DYNAMICS #
+  #########################
+  
+  # Specify lagged effects between within-person centered latent variables
+  Int3_F + Ext3_F ~ Int2_F + Ext2_F
+  Int4_F + Ext4_F ~ Int3_F + Ext3_F
+  Int5_F + Ext5_F ~ Int4_F + Ext4_F
+  Int6_F + Ext6_F ~ Int5_F + Ext5_F
+  Int7_F + Ext7_F ~ Int6_F + Ext6_F
+  
+  # Estimate correlations within same wave
+  Int2_F ~~ Ext2_F
+  Int3_F ~~ Ext3_F
+  Int4_F ~~ Ext4_F
+  Int5_F ~~ Ext5_F
+  Int6_F ~~ Ext6_F
+  Int7_F ~~ Ext7_F
+  
+  ##########################
+  # ADDITIONAL CONSTRAINTS #
+  ##########################
+  
+  # Constrain covariance of between factors and exogenous within factors to 0 
+  RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
+'
+RICLPM1_mod1_ext.fit <- cfa(RICLPM_mod1_ext, 
+  data = dat_SDQ, 
+  missing = 'ML'
+)
+summary(RICLPM1_mod1_ext.fit, standardized = T, fit.measures = T)
+#cfi = .970, RMSEA = .034, SRMR = .025
+```
+
+## mod2
+
+Group constraints. There are 2 ways to do this.
+
+```{r mod2 version 1}
+RICLPM_mod2_ext.fit <- cfa(RICLPM_mod1_ext,
+  data = dat_SDQ, 
+  missing = "ML", 
+  group = "ASD_final",
+  meanstructure = T, 
+  int.ov.free = T
+)
+summary(RICLPM_mod2.fit, standardized = T, fit.measures = T)
+#cfi = .985, RMSEA = .041, SRMR = .053
+```
+
+```{r mod2 version 2}
+RICLPM_mod2_ext <- '
+  
+  ################
+  # BETWEEN PART #
+  ################
+  
+  # Create between factors (random intercepts) for each indicator separately
+  RI_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
+  RI_Hyper =~ 1*Hyper2 + 1*Hyper3 + 1*Hyper4 + 1*Hyper5 + 1*Hyper6 + 1*Hyper7
+  
+  RI_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
+  RI_Peer =~ 1*Peer2 + 1*Peer3 + 1*Peer4 + 1*Peer5 + 1*Peer6 + 1*Peer7
+  
+  ##################################
+  # WITHIN PART: MEASUREMENT MODEL #
+  ##################################
+  
+  # Factor models for X at 5 waves
+  Ext2_F =~ Conduct2 + Hyper2
+  Ext3_F =~ Conduct3 + Hyper3
+  Ext4_F =~ Conduct4 + Hyper4
+  Ext5_F =~ Conduct5 + Hyper5
+  Ext6_F =~ Conduct6 + Hyper6
+  Ext7_F =~ Conduct7 + Hyper7
+  
+  # Factor models for Y at 5 waves
+  Int2_F =~ Emotional2 + Peer2
+  Int3_F =~ Emotional3 + Peer3
+  Int4_F =~ Emotional4 + Peer4
+  Int5_F =~ Emotional5 + Peer5
+  Int6_F =~ Emotional6 + Peer6
+  Int7_F =~ Emotional7 + Peer7
+  
+  #########################
+  # WITHIN PART: DYNAMICS #
+  #########################
+  
+  # Specify lagged effects between within-person centered latent variables (constrain   
+  # autoregressive effects across groups)
+  Int3_F ~ c(a1, a1)*Int2_F + c(b1, b1)*Ext2_F
+  Ext3_F ~ c(c1, c1)*Int2_F + c(d1, d1)*Ext2_F
+  Int4_F ~ c(a2, a2)*Int3_F + c(b2, b2)*Ext3_F
+  Ext4_F ~ c(c2, c2)*Int3_F + c(d2, d2)*Ext3_F
+  Int5_F ~ c(a3, a3)*Int4_F + c(b3, b3)*Ext4_F
+  Ext5_F ~ c(c3, c3)*Int4_F + c(d3, d3)*Ext4_F
+  Int6_F ~ c(a4, a4)*Int5_F + c(b4, d4)*Ext5_F
+  Ext6_F ~ c(c4, c4)*Int5_F + c(d4, d4)*Ext5_F
+  Int7_F ~ c(a5, a5)*Int6_F + c(b5, b5)*Ext6_F
+  Ext7_F ~ c(c5, c5)*Int6_F + c(d5, d5)*Ext6_F
+  
+  # Estimate correlations within same wave
+  Int2_F ~~ Ext2_F
+  Int3_F ~~ Ext3_F
+  Int4_F ~~ Ext4_F
+  Int5_F ~~ Ext5_F
+  Int6_F ~~ Ext6_F
+  Int7_F ~~ Ext7_F
+  
+  ##########################
+  # ADDITIONAL CONSTRAINTS #
+  ##########################
+  
+  # Constrain covariance of between factors and exogenous within factors to 0 
+  RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
+'
+RICLPM1_mod2_ext_alt.fit <- cfa(RICLPM_mod2_ext, 
+  data = dat_SDQ, 
+  missing = 'ML',
+  grou = "ASD_final",
+  meanstructure = T, 
+  int.ov.free = T
+)
+summary(RICLPM1_mod2_ext_alt.fit, standardized = T, fit.measures = T)
+#cfi = .967, RMSEA = .033, SRMR = .027
+```
+
+## Comparisons
+
+```{r Comparisons}
+comp_fit <- compareFit(RICLPM1_mod1_ext.fit, RICLPM_mod2_ext.fit, RICLPM1_mod2_ext_alt.fit) # improvement although constrained lagged regression coefficients?
+summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
+```
+
+## mod3: version of mod 1 for ASD group only
+
+```{r Data subset for ASD only}
+dat_SDQ_ASD <- dat_SDQ %>%
+  filter(ASD_final == "ASD")
+```
+
+```{r mod3 fitting}
+RICLPM_mod3.fit <- lavaan(RICLPM_mod1_ext,
+  data = dat_SDQ_ASD, 
+  missing = "ML"
+)
+summary(RICLPM_mod3.fit, standardized = T, fit.measures = T)
+#cfi = .990, RMSEA = .037, SRMR = .029
+```
+
+## mod4: version of mod 1 for non-ASD group only
+
+```{r Data subset for non-ASD only}
+dat_SDQ_nonASD <- dat_SDQ %>%
+  filter(ASD_final != "ASD")
+```
+
+```{r mod4 fitting}
+RICLPM_mod4.fit <- lavaan(RICLPM_mod1_ext,
   data = dat_SDQ_nonASD, 
   missing = "ML", 
   meanstructure = T, 
