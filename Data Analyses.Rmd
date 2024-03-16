@@ -26,10 +26,17 @@ MCS <- read.csv("MCS.csv")
 
 ```{r Variable Selection}
 #we start by selecting variables we want (or in this case disselecting variables we don't want)
-data <- MCS %>% select(-CNUM00, -Number_CMs_1, -Academic_Qual_Highest_1, -Banded_NETInc_LoneParent_1, -Banded_NETInc_Couple_1, -Total_Income_Couple_2, -Total_Income_LP_2, -Total_Joint_Income_3, -Total_Income_3, -Freq_DistSleep_Wheez_CM_2, -Freq_DisturbedSleep_Wheezing_3, -Freq_DisturbedSleep_Wheezing_4, -Freq_DisturbedSleep_Wheezing_5, -w6_Sleep_school_night, -w6_Wake_school_day, -w6_Sleep_no_school, -w6_Wake_no_school, -w6_how_long_sleep, -w6_how_awake_night, -w7_sleep_qual, -IQ3, -IQ4)
+data <- MCS %>% select(-Number_CMs_1, -Academic_Qual_Highest_1, -Banded_NETInc_LoneParent_1, -Banded_NETInc_Couple_1, -Total_Income_Couple_2, -Total_Income_LP_2, -Total_Joint_Income_3, -Total_Income_3, -Freq_DistSleep_Wheez_CM_2, -Freq_DisturbedSleep_Wheezing_3, -Freq_DisturbedSleep_Wheezing_4, -Freq_DisturbedSleep_Wheezing_5, -w6_Sleep_school_night, -w6_Wake_school_day, -w6_Sleep_no_school, -w6_Wake_no_school, -w6_how_long_sleep, -w6_how_awake_night, -w7_sleep_qual, -IQ3, -IQ4)
 ```
 
-## Recoding and Variable Renaming
+## Inclusion / Exclusion Criteria: No Twins and Triples
+
+```{r}
+data %>% count(CNUM00)
+# only include cases where CNUM00 == 1
+data <- data %>% filter(CNUM00 == 1)
+```
+## Transformations: Recoding and Variable Renaming
 
 We then need to insert NAs where they should be and recode the categorical numbers with letters so they make more sense. We also rename the variables here so it is less confusing.
 
@@ -198,20 +205,20 @@ data_ASD_final <- data_ASD_combined %>%
                             "1" = "ASD", 
                             "11" = "ASD", 
                             "111" = "ASD", 
-                            "112" = "ASD", 
-                            "12" = "ASD", 
+                            "112" = "Non-ASD", 
+                            "12" = "Non-ASD", 
                             "121" = "ASD", 
-                            "122" = "ASD", 
+                            "122" = "Non-ASD", 
                             "1221" = "ASD",
                             "1222" = "ASD", 
                             "2" = "Non-ASD", 
                             "21" = "ASD", 
                             "211" = "ASD", 
-                            "212" = "ASD", 
+                            "212" = "Non-ASD", 
                             "22" = "Non-ASD", 
                             "221" = "ASD",
                             "2211" = "ASD", 
-                            "2212" = "ASD", 
+                            "2212" = "Non-ASD", 
                             "222" = "Non-ASD", 
                             "2221" = "ASD", 
                             "2222" = "Non-ASD")) %>% #recode the combined columns
@@ -545,6 +552,50 @@ dat_SDQ |> count(Exter7)
 ##sum(is.na(dat_SDQ$Total_P_SDQ_7) == is.na(dat_SDQ$Emotional7))
 ```
 
+### Exclusion of SDQ subscale missing across all waves
+
+```{r SDQ all wave check}
+dat_SDQ <- dat_SDQ %>% 
+  select(MCSID, CNUM00, 
+         ethnicity, sex_final, ASD_final, 
+         Emotional2, Conduct2, Hyper2, Peer2, Prosocial2, Inter2, Exter2, Diff2, 
+         Emotional3, Conduct3, Hyper3, Peer3, Prosocial3, Inter3, Exter3, Diff3, 
+         Emotional4, Conduct4, Hyper4, Peer4, Prosocial4, Inter4, Exter4, Diff4, 
+         Emotional5, Conduct5, Hyper5, Peer5, Prosocial5, Inter5, Exter5, Diff5, 
+         Emotional6, Conduct6, Hyper6, Peer6, Prosocial6, Inter6, Exter6, Diff6, 
+         Emotional7, Conduct7, Hyper7, Peer7, Prosocial7, Inter7, Exter7, Diff7)
+
+dat_SDQ <- dat_SDQ %>% 
+  mutate(miss_check = if_else(is.na(Emotional2) & # Wave 2
+                                         is.na(Conduct2) & 
+                                         is.na(Hyper2) & 
+                                         is.na(Peer2) & 
+                                         is.na(Emotional3) & # Wave 3
+                                         is.na(Conduct3) & 
+                                         is.na(Hyper3) & 
+                                         is.na(Peer3) &
+                                         is.na(Emotional4) & # Wave 4
+                                         is.na(Conduct4) & 
+                                         is.na(Hyper4) & 
+                                         is.na(Peer4) &
+                                         is.na(Emotional5) & # Wave 5
+                                         is.na(Conduct5) & 
+                                         is.na(Hyper5) & 
+                                         is.na(Peer5) &
+                                         is.na(Emotional6) & # Wave 6
+                                         is.na(Conduct6) & 
+                                         is.na(Hyper6) & 
+                                         is.na(Peer6) &
+                                         is.na(Emotional7) & # Wave 7
+                                         is.na(Conduct7) & 
+                                         is.na(Hyper7) & 
+                                         is.na(Peer7), 1, 0))
+dat_SDQ %>% count(miss_check) # 44 cases
+dat_SDQ <- dat_SDQ %>%
+  filter(miss_check != 1) %>%
+  select(-miss_check)
+```
+
 ```{r rm unused dataset to clean up environment}
 rm(data, 
    data_ASD_combined, 
@@ -569,7 +620,7 @@ rm(data,
 ```{r Desc ASD}
 dat_SDQ %>% 
   count(ASD_final) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = ((n/sum(n)*100) %>% round(digits = 2)))
 ```
 
 ## Sex
@@ -577,7 +628,7 @@ dat_SDQ %>%
 ```{r Sex}
 dat_SDQ %>% 
   count(sex_final) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = ((n/sum(n)*100) %>% round(digits = 2)))
 ```
 
 ## Sex and ASD
@@ -587,13 +638,13 @@ dat_SDQ %>%
 dat_SDQ %>% 
   filter(ASD_final == "ASD") %>% 
   count(sex_final) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = ((n/sum(n)*100) %>% round(digits = 2)))
 
 #non-ASD group
 dat_SDQ %>% 
   filter(ASD_final == "Non-ASD") %>% 
   count(sex_final) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = ((n/sum(n)*100) %>% round(digits = 2)))
 
 #graph
 dat_SDQ %>% 
@@ -613,168 +664,128 @@ ggsave("Sex and ASD.jpg")
 #table
 dat_SDQ %>% 
   count(ethnicity) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = (n/sum(n)*100) %>% round(digits = 2))
 
 #Ethnicity and ASD
 #ASD group
 dat_SDQ %>% 
   filter(ASD_final == "ASD") %>% 
   count(ethnicity) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = (n/sum(n)*100) %>% round(digits = 2))
 
 #non-ASD group
 dat_SDQ %>% 
   filter(ASD_final == "Non-ASD") %>% 
   count(ethnicity) %>% 
-  mutate(prop = n/sum(n))
+  mutate(prop = (n/sum(n)*100) %>% round(digits = 2))
 ```
 
-## SDQ scores (total difficulty w2-w7)
+## SDQ scores (total difficulty and subscales w2-w7)
+
+```{r Create Function}
+desc_stat <- function(data, x) {
+  x_name <- rlang::quo_name(rlang::enquo(x))
+  return(data %>% group_by(ASD_final) %>%
+           summarise(mean = mean({{x}}, na.rm = T) %>% round(digits = 2),
+                     sd = sd({{x}}, na.rm = T) %>% round(digits = 2),
+                     min = min({{x}}, na.rm = T) %>% round(digits = 2),
+                     max = max({{x}}, na.rm = T) %>% round(digits = 2),
+                     n = n()) %>%
+           mutate(subscale = x_name))
+}
+na_case <- function(data, x) {
+  data %>% count({{x}}) %>% filter(is.na({{x}})) %>% pull(n)
+}
+```
 
 ```{r Wave 2}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Diff2, na.rm = T), 
-                             sd_diff = sd(Diff2, na.rm = T), 
-                             min_diff = min(Diff2, na.rm = T), 
-                             max_diff = max(Diff2, na.rm = T), 
-                             mean_pro = mean(Diff2, na.rm = T), 
-                             sd_pro = sd(Diff2, na.rm = T), 
-                             min_pro = min(Diff2, na.rm = T), 
-                             max_pro = max(Diff2, na.rm = T))
+bind_rows(desc_stat(dat_SDQ, Diff2),
+          desc_stat(dat_SDQ, Prosocial2),
+          desc_stat(dat_SDQ, Peer2),
+          desc_stat(dat_SDQ, Hyper2),
+          desc_stat(dat_SDQ, Conduct2),
+          desc_stat(dat_SDQ, Emotional2))
+na_case(dat_SDQ, Diff2)
+na_case(dat_SDQ, Prosocial2)
+na_case(dat_SDQ, Peer2)
+na_case(dat_SDQ, Hyper2)
+na_case(dat_SDQ, Conduct2)
+na_case(dat_SDQ, Emotional2)
 ```
 
 ```{r Wave 3}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Diff3, na.rm = T), 
-                             sd_diff = sd(Diff3, na.rm = T), 
-                             min_diff = min(Diff3, na.rm = T), 
-                             max_diff = max(Diff3, na.rm = T), 
-                             mean_pro = mean(Diff3, na.rm = T), 
-                             sd_pro = sd(Diff3, na.rm = T), 
-                             min_pro = min(Diff3, na.rm = T), 
-                             max_pro = max(Diff3, na.rm = T))
+bind_rows(desc_stat(dat_SDQ, Diff3),
+          desc_stat(dat_SDQ, Prosocial3),
+          desc_stat(dat_SDQ, Peer3),
+          desc_stat(dat_SDQ, Hyper3),
+          desc_stat(dat_SDQ, Conduct3),
+          desc_stat(dat_SDQ, Emotional3))
+na_case(dat_SDQ, Diff3)
+na_case(dat_SDQ, Prosocial3)
+na_case(dat_SDQ, Peer3)
+na_case(dat_SDQ, Hyper3)
+na_case(dat_SDQ, Conduct3)
+na_case(dat_SDQ, Emotional3)
 ```
 
 ```{r Wave 4}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Diff4, na.rm = T), 
-                             sd_diff = sd(Diff4, na.rm = T), 
-                             min_diff = min(Diff4, na.rm = T), 
-                             max_diff = max(Diff4, na.rm = T), 
-                             mean_pro = mean(Diff4, na.rm = T), 
-                             sd_pro = sd(Diff4, na.rm = T), 
-                             min_pro = min(Diff4, na.rm = T), 
-                             max_pro = max(Diff4, na.rm = T))
+bind_rows(desc_stat(dat_SDQ, Diff4),
+          desc_stat(dat_SDQ, Prosocial4),
+          desc_stat(dat_SDQ, Peer4),
+          desc_stat(dat_SDQ, Hyper4),
+          desc_stat(dat_SDQ, Conduct4),
+          desc_stat(dat_SDQ, Emotional4))
+na_case(dat_SDQ, Diff4)
+na_case(dat_SDQ, Prosocial4)
+na_case(dat_SDQ, Peer4)
+na_case(dat_SDQ, Hyper4)
+na_case(dat_SDQ, Conduct4)
+na_case(dat_SDQ, Emotional4)
 ```
 
 ```{r Wave 5}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Diff5, na.rm = T), 
-                             sd_diff = sd(Diff5, na.rm = T), 
-                             min_diff = min(Diff5, na.rm = T), 
-                             max_diff = max(Diff5, na.rm = T), 
-                             mean_pro = mean(Diff5, na.rm = T), 
-                             sd_pro = sd(Diff5, na.rm = T), 
-                             min_pro = min(Diff5, na.rm = T), 
-                             max_pro = max(Diff5, na.rm = T))
+bind_rows(desc_stat(dat_SDQ, Diff5),
+          desc_stat(dat_SDQ, Prosocial5),
+          desc_stat(dat_SDQ, Peer5),
+          desc_stat(dat_SDQ, Hyper5),
+          desc_stat(dat_SDQ, Conduct5),
+          desc_stat(dat_SDQ, Emotional5))
+na_case(dat_SDQ, Diff5)
+na_case(dat_SDQ, Prosocial5)
+na_case(dat_SDQ, Peer5)
+na_case(dat_SDQ, Hyper5)
+na_case(dat_SDQ, Conduct5)
+na_case(dat_SDQ, Emotional5)
 ```
 
 ```{r Wave 6}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Diff6, na.rm = T), 
-                             sd_diff = sd(Diff6, na.rm = T), 
-                             min_diff = min(Diff6, na.rm = T), 
-                             max_diff = max(Diff6, na.rm = T), 
-                             mean_pro = mean(Diff6, na.rm = T), 
-                             sd_pro = sd(Diff6, na.rm = T), 
-                             min_pro = min(Diff6, na.rm = T), 
-                             max_pro = max(Diff6, na.rm = T))
+bind_rows(desc_stat(dat_SDQ, Diff6),
+          desc_stat(dat_SDQ, Prosocial6),
+          desc_stat(dat_SDQ, Peer6),
+          desc_stat(dat_SDQ, Hyper6),
+          desc_stat(dat_SDQ, Conduct6),
+          desc_stat(dat_SDQ, Emotional6))
+na_case(dat_SDQ, Diff6)
+na_case(dat_SDQ, Prosocial6)
+na_case(dat_SDQ, Peer6)
+na_case(dat_SDQ, Hyper6)
+na_case(dat_SDQ, Conduct6)
+na_case(dat_SDQ, Emotional6)
 ```
 
 ```{r Wave 7}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Diff7, na.rm = T), 
-                             sd_diff = sd(Diff7, na.rm = T), 
-                             min_diff = min(Diff7, na.rm = T), 
-                             max_diff = max(Diff7, na.rm = T), 
-                             mean_pro = mean(Diff7, na.rm = T), 
-                             sd_pro = sd(Diff7, na.rm = T), 
-                             min_pro = min(Diff7, na.rm = T), 
-                             max_pro = max(Diff7, na.rm = T))
-```
-
-## SDQ scores (prosocial w2-w7)
-
-```{r Wave 2}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Prosocial2, na.rm = T), 
-                             sd_diff = sd(Prosocial2, na.rm = T), 
-                             min_diff = min(Prosocial2, na.rm = T), 
-                             max_diff = max(Prosocial2, na.rm = T), 
-                             mean_pro = mean(Prosocial2, na.rm = T), 
-                             sd_pro = sd(Prosocial2, na.rm = T), 
-                             min_pro = min(Prosocial2, na.rm = T), 
-                             max_pro = max(Prosocial2, na.rm = T))
-```
-
-```{r Wave 3}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Prosocial3, na.rm = T), 
-                             sd_diff = sd(Prosocial3, na.rm = T), 
-                             min_diff = min(Prosocial3, na.rm = T), 
-                             max_diff = max(Prosocial3, na.rm = T), 
-                             mean_pro = mean(Prosocial3, na.rm = T), 
-                             sd_pro = sd(Prosocial3, na.rm = T), 
-                             min_pro = min(Prosocial3, na.rm = T), 
-                             max_pro = max(Prosocial3, na.rm = T))
-```
-
-```{r Wave 4}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Prosocial4, na.rm = T), 
-                             sd_diff = sd(Prosocial4, na.rm = T), 
-                             min_diff = min(Prosocial4, na.rm = T), 
-                             max_diff = max(Prosocial4, na.rm = T), 
-                             mean_pro = mean(Prosocial4, na.rm = T), 
-                             sd_pro = sd(Prosocial4, na.rm = T), 
-                             min_pro = min(Prosocial4, na.rm = T), 
-                             max_pro = max(Prosocial4, na.rm = T))
-```
-
-```{r Wave 5}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Prosocial5, na.rm = T), 
-                             sd_diff = sd(Prosocial5, na.rm = T), 
-                             min_diff = min(Prosocial5, na.rm = T), 
-                             max_diff = max(Prosocial5, na.rm = T), 
-                             mean_pro = mean(Prosocial5, na.rm = T), 
-                             sd_pro = sd(Prosocial5, na.rm = T), 
-                             min_pro = min(Prosocial5, na.rm = T), 
-                             max_pro = max(Prosocial5, na.rm = T))
-```
-
-```{r Wave 6}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Prosocial6, na.rm = T), 
-                             sd_diff = sd(Prosocial6, na.rm = T), 
-                             min_diff = min(Prosocial6, na.rm = T), 
-                             max_diff = max(Prosocial6, na.rm = T), 
-                             mean_pro = mean(Prosocial6, na.rm = T), 
-                             sd_pro = sd(Prosocial6, na.rm = T), 
-                             min_pro = min(Prosocial6, na.rm = T), 
-                             max_pro = max(Prosocial6, na.rm = T))
-```
-
-```{r Wave 7}
-dat_SDQ %>% 
-  summarise(mean_diff = mean(Prosocial7, na.rm = T), 
-                             sd_diff = sd(Prosocial7, na.rm = T), 
-                             min_diff = min(Prosocial7, na.rm = T), 
-                             max_diff = max(Prosocial7, na.rm = T), 
-                             mean_pro = mean(Prosocial7, na.rm = T), 
-                             sd_pro = sd(Prosocial7, na.rm = T), 
-                             min_pro = min(Prosocial7, na.rm = T), 
-                             max_pro = max(Prosocial7, na.rm = T))
+bind_rows(desc_stat(dat_SDQ, Diff7),
+          desc_stat(dat_SDQ, Prosocial7),
+          desc_stat(dat_SDQ, Peer7),
+          desc_stat(dat_SDQ, Hyper7),
+          desc_stat(dat_SDQ, Conduct7),
+          desc_stat(dat_SDQ, Emotional7))
+na_case(dat_SDQ, Diff7)
+na_case(dat_SDQ, Prosocial7)
+na_case(dat_SDQ, Peer7)
+na_case(dat_SDQ, Hyper7)
+na_case(dat_SDQ, Conduct7)
+na_case(dat_SDQ, Emotional7)
 ```
 
 # Basic statsitical tests
@@ -788,7 +799,7 @@ results_chi <- chisq.test(x = dat_SDQ %>% pull(sex_final), # 1st grouping variab
   tidy()
 
 results_chi
-#chi(1) = 159.4939, p<.001
+#chi(1) = 151.17, p<.001
 
 Phi <- cramersV(x = dat_SDQ %>% pull(sex_final), 
                      y = dat_SDQ %>% pull(ASD_final), 
@@ -797,249 +808,303 @@ Phi
 #Phi φ = .10
 ```
 
-## t-tests (Total Difficulty and Prosocial)
+## t-tests (Total Difficulty and Subscales)
+
+```{r Create Function}
+ttestSDQ <- function(data, x) {
+  x_name <- rlang::quo_name(rlang::enquo(x))
+  return(t.test(data %>% 
+           filter(ASD_final == "ASD") %>% 
+           pull({{x}}), 
+         data %>% 
+           filter(ASD_final == "Non-ASD") %>% 
+           pull({{x}}), 
+         paired = F) %>%
+    tidy() %>% 
+    mutate(d = cohensD(data %>%
+                         filter(ASD_final == "ASD") %>%
+                         pull({{x}}),
+                       data %>%
+                         filter(ASD_final == "Non-ASD") %>%
+                         pull({{x}}),
+                       method = "unequal")
+           ) %>% 
+    mutate(subscale = x_name) %>%
+    select(subscale, statistic, p.value, d))
+}
+```
 
 ```{r Wave 2}
 #ASD vs non-ASD differences in parental SDQ scores
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Diff2), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Diff2), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Diff2), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Diff2), 
-        method = "unequal")
-
-#t(521.646) = 13.44896, p<.001, [3.26, 4.37], d = .66 (medium effect)
-
-#ASD vs non-ASD differences in parental SDQ prosocial
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Prosocial2), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Prosocial2), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Prosocial2), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Prosocial2), 
-        method = "unequal")
-
-#t(528.5708) = -10.27958, p<.001, [-1.31, -.89], d = .52 (medium effect)
+bind_rows(ttestSDQ(dat_SDQ, Diff2),
+          ttestSDQ(dat_SDQ, Prosocial2),
+          ttestSDQ(dat_SDQ, Peer2),
+          ttestSDQ(dat_SDQ, Hyper2),
+          ttestSDQ(dat_SDQ, Conduct2),
+          ttestSDQ(dat_SDQ, Emotional2)
+          )
 ```
 
 ```{r Wave 3}
 #ASD vs non-ASD differences in parental SDQ scores
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Diff3), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Diff3), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Diff3), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Diff3), 
-        method = "unequal")
-
-#t(565.2985) = 20.26116, p<.001, [5.38, 6.54], d = 1.01 (large effect)
-
-#ASD vs non-ASD differences in parental SDQ prosocial
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Prosocial3), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Prosocial3), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Prosocial3), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Prosocial3), 
-        method = "unequal")
-
-#t(567.1602) = -13.3991, p<.001, [-1.57, -1.17], d = .67 (medium effect)
+bind_rows(ttestSDQ(dat_SDQ, Diff3),
+          ttestSDQ(dat_SDQ, Prosocial3),
+          ttestSDQ(dat_SDQ, Peer3),
+          ttestSDQ(dat_SDQ, Hyper3),
+          ttestSDQ(dat_SDQ, Conduct3),
+          ttestSDQ(dat_SDQ, Emotional3)
+          )
 ```
 
 ```{r Wave 4}
-#ASD vs non-ASD differences in parental SDQ scores
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Diff4), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Diff4), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Diff4), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Diff4), 
-        method = "unequal")
-
-#t(542.6737) = 24.69587, p<.001, [7.44, 8.72], d = 1.27 (large effect)
-
-#ASD vs non-ASD differences in parental SDQ prosocial
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Prosocial4), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Prosocial4), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Prosocial4), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Prosocial4), 
-        method = "unequal")
-
-#t(542.5182) = -15.70134, p<.001, [-1.91, -1.49], d = .82 (large effect)
+bind_rows(ttestSDQ(dat_SDQ, Diff4),
+          ttestSDQ(dat_SDQ, Prosocial4),
+          ttestSDQ(dat_SDQ, Peer4),
+          ttestSDQ(dat_SDQ, Hyper4),
+          ttestSDQ(dat_SDQ, Conduct4),
+          ttestSDQ(dat_SDQ, Emotional4)
+          )
 ```
 
 ```{r Wave 5}
 #ASD vs non-ASD differences in parental SDQ scores
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Diff5), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Diff5), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Diff5), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Diff5), 
-        method = "unequal")
-
-#t(485.659) = 28.44564, p<.001, [9.45, 10.85], d = 1.55 (large effect)
-
-#ASD vs non-ASD differences in parental SDQ prosocial
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Prosocial5), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Prosocial5), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Prosocial5), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Prosocial5), 
-        method = "unequal")
-
-#t(540.1155) = -17.01301, p<.001, [-2.00, -1.58], d = .90 (large effect)
+bind_rows(ttestSDQ(dat_SDQ, Diff5),
+          ttestSDQ(dat_SDQ, Prosocial5),
+          ttestSDQ(dat_SDQ, Peer5),
+          ttestSDQ(dat_SDQ, Hyper5),
+          ttestSDQ(dat_SDQ, Conduct5),
+          ttestSDQ(dat_SDQ, Emotional5)
+          )
 ```
 
 ```{r Wave 6}
 #ASD vs non-ASD differences in parental SDQ scores
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Diff6), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Diff6), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Diff6), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Diff6), 
-        method = "unequal")
-
-#t(494.8745) = 26.90292, p<.001, [8.91, 10.32], d = 1.43 (large effect)
-
-#ASD vs non-ASD differences in parental SDQ prosocial
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Prosocial6), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Prosocial6), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Prosocial6), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Prosocial6), 
-        method = "unequal")
-
-#t(496.8828) = -16.35652, p<.001, [-2.09, -1.64], d = .87 (large effect)
+bind_rows(ttestSDQ(dat_SDQ, Diff6),
+          ttestSDQ(dat_SDQ, Prosocial6),
+          ttestSDQ(dat_SDQ, Peer6),
+          ttestSDQ(dat_SDQ, Hyper6),
+          ttestSDQ(dat_SDQ, Conduct6),
+          ttestSDQ(dat_SDQ, Emotional6)
+          )
 ```
 
 ```{r Wave 7}
 #ASD vs non-ASD differences in parental SDQ scores
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Diff7), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Diff7), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Diff7), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Diff7), 
-        method = "unequal")
-
-#t(392.1733) = 22.08333, p<.001, [8.13, 9.72], d = 1.33 (large effect)
-
-#ASD vs non-ASD differences in parental SDQ prosocial
-t.test(dat_SDQ %>% 
-         filter(ASD_final == "ASD") %>% 
-         pull(Prosocial7), 
-       dat_SDQ %>% 
-         filter(ASD_final == "Non-ASD") %>% 
-         pull(Prosocial7), 
-       paired = F) %>% 
-  tidy()
-cohensD(dat_SDQ %>% 
-          filter(ASD_final == "ASD") %>% 
-          pull(Prosocial7), 
-        dat_SDQ %>% 
-          filter(ASD_final == "Non-ASD") %>% 
-          pull(Prosocial7), 
-        method = "unequal")
-
-#t(392.3951) = -14.15916, p<.001, [-2.06, -1.56], d = .85 (large effect)
+bind_rows(ttestSDQ(dat_SDQ, Diff7),
+          ttestSDQ(dat_SDQ, Prosocial7),
+          ttestSDQ(dat_SDQ, Peer7),
+          ttestSDQ(dat_SDQ, Hyper7),
+          ttestSDQ(dat_SDQ, Conduct7),
+          ttestSDQ(dat_SDQ, Emotional7)
+          )
 ```
 
-# RI-CLPM
+# Multiple-Indicator
+
+RI-CLPM (multiple-indicator versin) is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
+
+## mod1
+
+```{r mod1: basic model for both ASD and non-ASD}
+RICLPM_mod1_ext <- '
+  
+  ################
+  # BETWEEN PART #
+  ################
+  
+  # Create between factors (random intercepts) for each indicator separately
+  RI_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
+  RI_Hyper =~ 1*Hyper2 + 1*Hyper3 + 1*Hyper4 + 1*Hyper5 + 1*Hyper6 + 1*Hyper7
+  
+  RI_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
+  RI_Peer =~ 1*Peer2 + 1*Peer3 + 1*Peer4 + 1*Peer5 + 1*Peer6 + 1*Peer7
+  
+  ##################################
+  # WITHIN PART: MEASUREMENT MODEL #
+  ##################################
+  
+  # Factor models for X at 5 waves
+  Ext2_F =~ Conduct2 + Hyper2
+  Ext3_F =~ Conduct3 + Hyper3
+  Ext4_F =~ Conduct4 + Hyper4
+  Ext5_F =~ Conduct5 + Hyper5
+  Ext6_F =~ Conduct6 + Hyper6
+  Ext7_F =~ Conduct7 + Hyper7
+  
+  # Factor models for Y at 5 waves
+  Int2_F =~ Emotional2 + Peer2
+  Int3_F =~ Emotional3 + Peer3
+  Int4_F =~ Emotional4 + Peer4
+  Int5_F =~ Emotional5 + Peer5
+  Int6_F =~ Emotional6 + Peer6
+  Int7_F =~ Emotional7 + Peer7
+  
+  #########################
+  # WITHIN PART: DYNAMICS #
+  #########################
+  
+  # Specify lagged effects between within-person centered latent variables
+  Int3_F + Ext3_F ~ Int2_F + Ext2_F
+  Int4_F + Ext4_F ~ Int3_F + Ext3_F
+  Int5_F + Ext5_F ~ Int4_F + Ext4_F
+  Int6_F + Ext6_F ~ Int5_F + Ext5_F
+  Int7_F + Ext7_F ~ Int6_F + Ext6_F
+  
+  # Estimate correlations within same wave
+  Int2_F ~~ Ext2_F
+  Int3_F ~~ Ext3_F
+  Int4_F ~~ Ext4_F
+  Int5_F ~~ Ext5_F
+  Int6_F ~~ Ext6_F
+  Int7_F ~~ Ext7_F
+  
+  ##########################
+  # ADDITIONAL CONSTRAINTS #
+  ##########################
+  
+  # Constrain covariance of between factors and exogenous within factors to 0 
+  RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
+'
+RICLPM1_mod1_ext.fit <- sem(RICLPM_mod1_ext, 
+  data = dat_SDQ, 
+  missing = 'ML'
+)
+summary(RICLPM1_mod1_ext.fit, standardized = T, fit.measures = T)
+#cfi = .970, RMSEA = .034, SRMR = .025
+```
+
+## mod2
+
+Group constraints. There are 2 ways to do this.
+
+```{r mod2 version 1}
+RICLPM_mod2_ext.fit <- sem(RICLPM_mod1_ext,
+  data = dat_SDQ, 
+  missing = "ML", 
+  group = "ASD_final"
+)
+summary(RICLPM_mod2_ext.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM_mod2_ext.fit, "cov.lv")
+#cfi = .968, RMSEA = .033, SRMR = .025
+```
+
+```{r mod2 version 2}
+RICLPM_mod2_ext <- '
+  
+  ################
+  # BETWEEN PART #
+  ################
+  
+  # Create between factors (random intercepts) for each indicator separately
+  RI_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
+  RI_Hyper =~ 1*Hyper2 + 1*Hyper3 + 1*Hyper4 + 1*Hyper5 + 1*Hyper6 + 1*Hyper7
+  
+  RI_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
+  RI_Peer =~ 1*Peer2 + 1*Peer3 + 1*Peer4 + 1*Peer5 + 1*Peer6 + 1*Peer7
+  
+  ##################################
+  # WITHIN PART: MEASUREMENT MODEL #
+  ##################################
+  
+  # Factor models for X at 5 waves
+  Ext2_F =~ Conduct2 + Hyper2
+  Ext3_F =~ Conduct3 + Hyper3
+  Ext4_F =~ Conduct4 + Hyper4
+  Ext5_F =~ Conduct5 + Hyper5
+  Ext6_F =~ Conduct6 + Hyper6
+  Ext7_F =~ Conduct7 + Hyper7
+  
+  # Factor models for Y at 5 waves
+  Int2_F =~ Emotional2 + Peer2
+  Int3_F =~ Emotional3 + Peer3
+  Int4_F =~ Emotional4 + Peer4
+  Int5_F =~ Emotional5 + Peer5
+  Int6_F =~ Emotional6 + Peer6
+  Int7_F =~ Emotional7 + Peer7
+  
+  #########################
+  # WITHIN PART: DYNAMICS #
+  #########################
+  
+  # Specify lagged effects between within-person centered latent variables (constrain   
+  # autoregressive effects across groups)
+  Int3_F ~ c(a1, a1)*Int2_F + c(b1, b1)*Ext2_F
+  Ext3_F ~ c(c1, c1)*Int2_F + c(d1, d1)*Ext2_F
+  Int4_F ~ c(a2, a2)*Int3_F + c(b2, b2)*Ext3_F
+  Ext4_F ~ c(c2, c2)*Int3_F + c(d2, d2)*Ext3_F
+  Int5_F ~ c(a3, a3)*Int4_F + c(b3, b3)*Ext4_F
+  Ext5_F ~ c(c3, c3)*Int4_F + c(d3, d3)*Ext4_F
+  Int6_F ~ c(a4, a4)*Int5_F + c(b4, d4)*Ext5_F
+  Ext6_F ~ c(c4, c4)*Int5_F + c(d4, d4)*Ext5_F
+  Int7_F ~ c(a5, a5)*Int6_F + c(b5, b5)*Ext6_F
+  Ext7_F ~ c(c5, c5)*Int6_F + c(d5, d5)*Ext6_F
+  
+  # Estimate correlations within same wave
+  Int2_F ~~ Ext2_F
+  Int3_F ~~ Ext3_F
+  Int4_F ~~ Ext4_F
+  Int5_F ~~ Ext5_F
+  Int6_F ~~ Ext6_F
+  Int7_F ~~ Ext7_F
+  
+  ##########################
+  # ADDITIONAL CONSTRAINTS #
+  ##########################
+  
+  # Constrain covariance of between factors and exogenous within factors to 0 
+  RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
+'
+RICLPM1_mod2_ext_alt.fit <- sem(RICLPM_mod2_ext, 
+  data = dat_SDQ, 
+  missing = 'ML',
+  group = "ASD_final"
+)
+summary(RICLPM1_mod2_ext_alt.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM1_mod2_ext_alt.fit, "cov.lv")
+#cfi = .967, RMSEA = .033, SRMR = .027
+```
+
+## Comparisons
+
+```{r Comparisons}
+comp_fit <- compareFit(RICLPM1_mod1_ext.fit, RICLPM1_mod2_ext_alt.fit) # constrained lagged coefficients relevant to study
+summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
+```
+
+## mod3: version of mod 1 for ASD group only
+
+```{r Data subset for ASD only}
+dat_SDQ_ASD <- dat_SDQ %>%
+  filter(ASD_final == "ASD")
+```
+
+```{r mod3 fitting}
+RICLPM_mod3_ext.fit <- sem(RICLPM_mod1_ext,
+  data = dat_SDQ_ASD, 
+  missing = "ML"
+)
+summary(RICLPM_mod3_ext.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM_mod3_ext.fit, "cov.lv")
+#cfi = .950, RMSEA = .048, SRMR = .043
+```
+
+## mod4: version of mod 1 for non-ASD group only
+
+```{r Data subset for non-ASD only}
+dat_SDQ_nonASD <- dat_SDQ %>%
+  filter(ASD_final != "ASD")
+```
+
+```{r mod4 fitting}
+RICLPM_mod4_ext.fit <- sem(RICLPM_mod1_ext,
+  data = dat_SDQ_nonASD, 
+  missing = "ML"
+)
+summary(RICLPM_mod4_ext.fit, standardized = T, fit.measures = T)
+#cfi = .969, RMSEA = .033, SRMR = .042
+```
+
+# Sensitivity Analysis: RI-CLPM with tabulated exter-inter scores
 
 RI-CLPM is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
 
@@ -1261,7 +1326,7 @@ summary(RICLPM_mod2_alt.fit, standardized = T, fit.measures = T)
 ## Comparisons
 
 ```{r Comparisons}
-comp_fit <- compareFit(RICLPM_mod1.fit, RICLPM_mod2.fit, RICLPM_mod2_alt.fit) # improvement although constrained lagged regression coefficients?
+comp_fit <- compareFit(RICLPM_mod1.fit, RICLPM_mod2_alt.fit)
 summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
 ```
 
@@ -1299,211 +1364,6 @@ RICLPM_mod4.fit <- lavaan(RICLPM_mod1,
 )
 summary(RICLPM_mod4.fit, standardized = T, fit.measures = T)
 #cfi = .988, RMSEA = .036, SRMR = .035
-```
-
-# Multiple-Indicator
-
-RI-CLPM (multiple-indicator versin) is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
-
-## mod1
-
-```{r mod1: basic model for both ASD and non-ASD}
-RICLPM_mod1_ext <- '
-  
-  ################
-  # BETWEEN PART #
-  ################
-  
-  # Create between factors (random intercepts) for each indicator separately
-  RI_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
-  RI_Hyper =~ 1*Hyper2 + 1*Hyper3 + 1*Hyper4 + 1*Hyper5 + 1*Hyper6 + 1*Hyper7
-  
-  RI_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
-  RI_Peer =~ 1*Peer2 + 1*Peer3 + 1*Peer4 + 1*Peer5 + 1*Peer6 + 1*Peer7
-  
-  ##################################
-  # WITHIN PART: MEASUREMENT MODEL #
-  ##################################
-  
-  # Factor models for X at 5 waves
-  Ext2_F =~ Conduct2 + Hyper2
-  Ext3_F =~ Conduct3 + Hyper3
-  Ext4_F =~ Conduct4 + Hyper4
-  Ext5_F =~ Conduct5 + Hyper5
-  Ext6_F =~ Conduct6 + Hyper6
-  Ext7_F =~ Conduct7 + Hyper7
-  
-  # Factor models for Y at 5 waves
-  Int2_F =~ Emotional2 + Peer2
-  Int3_F =~ Emotional3 + Peer3
-  Int4_F =~ Emotional4 + Peer4
-  Int5_F =~ Emotional5 + Peer5
-  Int6_F =~ Emotional6 + Peer6
-  Int7_F =~ Emotional7 + Peer7
-  
-  #########################
-  # WITHIN PART: DYNAMICS #
-  #########################
-  
-  # Specify lagged effects between within-person centered latent variables
-  Int3_F + Ext3_F ~ Int2_F + Ext2_F
-  Int4_F + Ext4_F ~ Int3_F + Ext3_F
-  Int5_F + Ext5_F ~ Int4_F + Ext4_F
-  Int6_F + Ext6_F ~ Int5_F + Ext5_F
-  Int7_F + Ext7_F ~ Int6_F + Ext6_F
-  
-  # Estimate correlations within same wave
-  Int2_F ~~ Ext2_F
-  Int3_F ~~ Ext3_F
-  Int4_F ~~ Ext4_F
-  Int5_F ~~ Ext5_F
-  Int6_F ~~ Ext6_F
-  Int7_F ~~ Ext7_F
-  
-  ##########################
-  # ADDITIONAL CONSTRAINTS #
-  ##########################
-  
-  # Constrain covariance of between factors and exogenous within factors to 0 
-  RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
-'
-RICLPM1_mod1_ext.fit <- sem(RICLPM_mod1_ext, 
-  data = dat_SDQ, 
-  missing = 'ML'
-)
-summary(RICLPM1_mod1_ext.fit, standardized = T, fit.measures = T)
-#cfi = .970, RMSEA = .034, SRMR = .025
-```
-
-## mod2
-
-Group constraints. There are 2 ways to do this.
-
-```{r mod2 version 1}
-RICLPM_mod2_ext.fit <- sem(RICLPM_mod1_ext,
-  data = dat_SDQ, 
-  missing = "ML", 
-  group = "ASD_final"
-)
-summary(RICLPM_mod2_ext.fit, standardized = T, fit.measures = T)
-lavInspect(RICLPM_mod2_ext.fit, "cov.lv")
-#cfi = .968, RMSEA = .033, SRMR = .025
-```
-
-```{r mod2 version 2}
-RICLPM_mod2_ext <- '
-  
-  ################
-  # BETWEEN PART #
-  ################
-  
-  # Create between factors (random intercepts) for each indicator separately
-  RI_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
-  RI_Hyper =~ 1*Hyper2 + 1*Hyper3 + 1*Hyper4 + 1*Hyper5 + 1*Hyper6 + 1*Hyper7
-  
-  RI_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
-  RI_Peer =~ 1*Peer2 + 1*Peer3 + 1*Peer4 + 1*Peer5 + 1*Peer6 + 1*Peer7
-  
-  ##################################
-  # WITHIN PART: MEASUREMENT MODEL #
-  ##################################
-  
-  # Factor models for X at 5 waves
-  Ext2_F =~ Conduct2 + Hyper2
-  Ext3_F =~ Conduct3 + Hyper3
-  Ext4_F =~ Conduct4 + Hyper4
-  Ext5_F =~ Conduct5 + Hyper5
-  Ext6_F =~ Conduct6 + Hyper6
-  Ext7_F =~ Conduct7 + Hyper7
-  
-  # Factor models for Y at 5 waves
-  Int2_F =~ Emotional2 + Peer2
-  Int3_F =~ Emotional3 + Peer3
-  Int4_F =~ Emotional4 + Peer4
-  Int5_F =~ Emotional5 + Peer5
-  Int6_F =~ Emotional6 + Peer6
-  Int7_F =~ Emotional7 + Peer7
-  
-  #########################
-  # WITHIN PART: DYNAMICS #
-  #########################
-  
-  # Specify lagged effects between within-person centered latent variables (constrain   
-  # autoregressive effects across groups)
-  Int3_F ~ c(a1, a1)*Int2_F + c(b1, b1)*Ext2_F
-  Ext3_F ~ c(c1, c1)*Int2_F + c(d1, d1)*Ext2_F
-  Int4_F ~ c(a2, a2)*Int3_F + c(b2, b2)*Ext3_F
-  Ext4_F ~ c(c2, c2)*Int3_F + c(d2, d2)*Ext3_F
-  Int5_F ~ c(a3, a3)*Int4_F + c(b3, b3)*Ext4_F
-  Ext5_F ~ c(c3, c3)*Int4_F + c(d3, d3)*Ext4_F
-  Int6_F ~ c(a4, a4)*Int5_F + c(b4, d4)*Ext5_F
-  Ext6_F ~ c(c4, c4)*Int5_F + c(d4, d4)*Ext5_F
-  Int7_F ~ c(a5, a5)*Int6_F + c(b5, b5)*Ext6_F
-  Ext7_F ~ c(c5, c5)*Int6_F + c(d5, d5)*Ext6_F
-  
-  # Estimate correlations within same wave
-  Int2_F ~~ Ext2_F
-  Int3_F ~~ Ext3_F
-  Int4_F ~~ Ext4_F
-  Int5_F ~~ Ext5_F
-  Int6_F ~~ Ext6_F
-  Int7_F ~~ Ext7_F
-  
-  ##########################
-  # ADDITIONAL CONSTRAINTS #
-  ##########################
-  
-  # Constrain covariance of between factors and exogenous within factors to 0 
-  RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
-'
-RICLPM1_mod2_ext_alt.fit <- sem(RICLPM_mod2_ext, 
-  data = dat_SDQ, 
-  missing = 'ML',
-  group = "ASD_final"
-)
-summary(RICLPM1_mod2_ext_alt.fit, standardized = T, fit.measures = T)
-lavInspect(RICLPM1_mod2_ext_alt.fit, "cov.lv")
-#cfi = .967, RMSEA = .033, SRMR = .027
-```
-
-## Comparisons
-
-```{r Comparisons}
-comp_fit <- compareFit(RICLPM1_mod1_ext.fit, RICLPM_mod2_ext.fit, RICLPM1_mod2_ext_alt.fit) # improvement although constrained lagged regression coefficients?
-summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
-```
-
-## mod3: version of mod 1 for ASD group only
-
-```{r Data subset for ASD only}
-dat_SDQ_ASD <- dat_SDQ %>%
-  filter(ASD_final == "ASD")
-```
-
-```{r mod3 fitting}
-RICLPM_mod3_ext.fit <- sem(RICLPM_mod1_ext,
-  data = dat_SDQ_ASD, 
-  missing = "ML"
-)
-summary(RICLPM_mod3_ext.fit, standardized = T, fit.measures = T)
-lavInspect(RICLPM_mod3_ext.fit, "cov.lv")
-#cfi = .950, RMSEA = .048, SRMR = .043
-```
-
-## mod4: version of mod 1 for non-ASD group only
-
-```{r Data subset for non-ASD only}
-dat_SDQ_nonASD <- dat_SDQ %>%
-  filter(ASD_final != "ASD")
-```
-
-```{r mod4 fitting}
-RICLPM_mod4_ext.fit <- sem(RICLPM_mod1_ext,
-  data = dat_SDQ_nonASD, 
-  missing = "ML"
-)
-summary(RICLPM_mod4_ext.fit, standardized = T, fit.measures = T)
-#cfi = .969, RMSEA = .033, SRMR = .042
 ```
 
 ## Results
