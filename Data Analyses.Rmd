@@ -830,73 +830,94 @@ ttestSDQ <- function(data, x) {
                        method = "unequal")
            ) %>% 
     mutate(subscale = x_name) %>%
-    select(subscale, statistic, p.value, d))
+    select(subscale, estimate, statistic, p.value, d) %>%
+      mutate(estimate = estimate %>% round(digits = 2),
+             statistic = statistic %>% round(digits = 2),
+             d = d %>% round(digits = 2))
+    )
 }
 ```
 
 ```{r Wave 2}
 #ASD vs non-ASD differences in parental SDQ scores
-bind_rows(ttestSDQ(dat_SDQ, Diff2),
+w2ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff2),
           ttestSDQ(dat_SDQ, Prosocial2),
           ttestSDQ(dat_SDQ, Peer2),
           ttestSDQ(dat_SDQ, Hyper2),
           ttestSDQ(dat_SDQ, Conduct2),
           ttestSDQ(dat_SDQ, Emotional2)
-          )
+          ) %>% 
+  mutate(wave = 2)
 ```
 
 ```{r Wave 3}
 #ASD vs non-ASD differences in parental SDQ scores
-bind_rows(ttestSDQ(dat_SDQ, Diff3),
+w3ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff3),
           ttestSDQ(dat_SDQ, Prosocial3),
           ttestSDQ(dat_SDQ, Peer3),
           ttestSDQ(dat_SDQ, Hyper3),
           ttestSDQ(dat_SDQ, Conduct3),
           ttestSDQ(dat_SDQ, Emotional3)
-          )
+          ) %>% 
+  mutate(wave = 3)
 ```
 
 ```{r Wave 4}
-bind_rows(ttestSDQ(dat_SDQ, Diff4),
+#ASD vs non-ASD differences in parental SDQ scores
+w4ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff4),
           ttestSDQ(dat_SDQ, Prosocial4),
           ttestSDQ(dat_SDQ, Peer4),
           ttestSDQ(dat_SDQ, Hyper4),
           ttestSDQ(dat_SDQ, Conduct4),
           ttestSDQ(dat_SDQ, Emotional4)
-          )
+          ) %>% 
+  mutate(wave = 4)
 ```
 
 ```{r Wave 5}
 #ASD vs non-ASD differences in parental SDQ scores
-bind_rows(ttestSDQ(dat_SDQ, Diff5),
+w5ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff5),
           ttestSDQ(dat_SDQ, Prosocial5),
           ttestSDQ(dat_SDQ, Peer5),
           ttestSDQ(dat_SDQ, Hyper5),
           ttestSDQ(dat_SDQ, Conduct5),
           ttestSDQ(dat_SDQ, Emotional5)
-          )
+          ) %>% 
+  mutate(wave = 5)
 ```
 
 ```{r Wave 6}
 #ASD vs non-ASD differences in parental SDQ scores
-bind_rows(ttestSDQ(dat_SDQ, Diff6),
+w6ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff6),
           ttestSDQ(dat_SDQ, Prosocial6),
           ttestSDQ(dat_SDQ, Peer6),
           ttestSDQ(dat_SDQ, Hyper6),
           ttestSDQ(dat_SDQ, Conduct6),
           ttestSDQ(dat_SDQ, Emotional6)
-          )
+          ) %>% 
+  mutate(wave = 6)
 ```
 
 ```{r Wave 7}
 #ASD vs non-ASD differences in parental SDQ scores
-bind_rows(ttestSDQ(dat_SDQ, Diff7),
+w7ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff7),
           ttestSDQ(dat_SDQ, Prosocial7),
           ttestSDQ(dat_SDQ, Peer7),
           ttestSDQ(dat_SDQ, Hyper7),
           ttestSDQ(dat_SDQ, Conduct7),
           ttestSDQ(dat_SDQ, Emotional7)
-          )
+          ) %>% 
+  mutate(wave = 7)
+```
+
+```{r d plot}
+dat_d <- bind_rows(w2ttest, w3ttest, w4ttest, w5ttest, w6ttest, w7ttest) 
+dat_d %>% 
+  ggplot(aes(x = wave, y = d)) +
+  geom_point() + 
+  geom_smooth(method = lm, se = F)
+ggsave("corr_plot.jpg")
+cor.test(dat_d %>% pull(wave), dat_d %>% pull(d), method = "pearson") %>% tidy()
 ```
 
 # Multiple-Indicator
@@ -977,7 +998,7 @@ summary(RICLPM1_mod1_ext.fit, standardized = T, fit.measures = T)
 
 Group constraints. There are 2 ways to do this.
 
-```{r mod2 version 1}
+```{r mod2 version 1 not used}
 RICLPM_mod2_ext.fit <- sem(RICLPM_mod1_ext,
   data = dat_SDQ, 
   missing = "ML", 
@@ -1085,7 +1106,7 @@ RICLPM_mod3_ext.fit <- sem(RICLPM_mod1_ext,
 )
 summary(RICLPM_mod3_ext.fit, standardized = T, fit.measures = T)
 lavInspect(RICLPM_mod3_ext.fit, "cov.lv")
-#cfi = .950, RMSEA = .048, SRMR = .043
+#cfi = 0.949, RMSEA = 0.048, SRMR = 0.047
 ```
 
 ## mod4: version of mod 1 for non-ASD group only
@@ -1320,7 +1341,7 @@ RICLPM_mod2_alt.fit <- lavaan(RICLPM_mod2_alt,
   int.ov.free = T
 )
 summary(RICLPM_mod2_alt.fit, standardized = T, fit.measures = T)
-#cfi = .987, RMSEA = .034, SRMR = .035
+#cfi = .987, RMSEA = .033, SRMR = .035
 ```
 
 ## Comparisons
