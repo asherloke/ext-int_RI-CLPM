@@ -666,22 +666,6 @@ dat_SDQ %>%
   count(ethnicity) %>% 
   mutate(prop = (n/sum(n)*100) %>% round(digits = 2))
 
-dat_SDQ <- dat_SDQ %>% mutate(ethnicity = recode(ethnicity, 
-                                     "Bangladeshi" = "non-White", 
-                                     "Black African" = "non-White", 
-                                     "Black Caribbean" = "non-White", 
-                                     "Chinese" = "non-White", 
-                                     "Indian" = "non-White", 
-                                     "Mixed" = "non-White", 
-                                     "Other Black" = "non-White",
-                                     "Other Asian" = "non-White", 
-                                     "Other Ethnic Group" = "non-White", 
-                                     "Pakistani" = "non-White"))
-
-dat_SDQ %>% 
-  count(ethnicity) %>% 
-  mutate(prop = (n/sum(n)*100) %>% round(digits = 2))
-
 #Ethnicity and ASD
 #ASD group
 dat_SDQ %>% 
@@ -715,21 +699,12 @@ na_case <- function(data, x) {
 ```
 
 ```{r Wave 2}
-w2_sdq <- bind_rows(desc_stat(dat_SDQ, Diff2),
+bind_rows(desc_stat(dat_SDQ, Diff2),
           desc_stat(dat_SDQ, Prosocial2),
           desc_stat(dat_SDQ, Peer2),
           desc_stat(dat_SDQ, Hyper2),
           desc_stat(dat_SDQ, Conduct2),
-          desc_stat(dat_SDQ, Emotional2)) %>%
-  mutate(wave = 2,
-         subscale = recode(subscale, 
-                           "Diff2" = "Diff",
-                           "Prosocial2" = "Prosocial",
-                           "Peer2" = "Peer",
-                           "Hyper2" = "Hyper",
-                           "Conduct2" = "Conduct",
-                           "Emotional2" = "Emotional"))
-w2_sdq
+          desc_stat(dat_SDQ, Emotional2))
 na_case(dat_SDQ, Diff2)
 na_case(dat_SDQ, Prosocial2)
 na_case(dat_SDQ, Peer2)
@@ -739,21 +714,12 @@ na_case(dat_SDQ, Emotional2)
 ```
 
 ```{r Wave 3}
-w3_sdq <- bind_rows(desc_stat(dat_SDQ, Diff3),
+bind_rows(desc_stat(dat_SDQ, Diff3),
           desc_stat(dat_SDQ, Prosocial3),
           desc_stat(dat_SDQ, Peer3),
           desc_stat(dat_SDQ, Hyper3),
           desc_stat(dat_SDQ, Conduct3),
-          desc_stat(dat_SDQ, Emotional3)) %>%
-  mutate(wave = 3,
-         subscale = recode(subscale, 
-                           "Diff3" = "Diff",
-                           "Prosocial3" = "Prosocial",
-                           "Peer3" = "Peer",
-                           "Hyper3" = "Hyper",
-                           "Conduct3" = "Conduct",
-                           "Emotional3" = "Emotional"))
-w3_sdq
+          desc_stat(dat_SDQ, Emotional3))
 na_case(dat_SDQ, Diff3)
 na_case(dat_SDQ, Prosocial3)
 na_case(dat_SDQ, Peer3)
@@ -763,21 +729,12 @@ na_case(dat_SDQ, Emotional3)
 ```
 
 ```{r Wave 4}
-w4_sdq <- bind_rows(desc_stat(dat_SDQ, Diff4),
+bind_rows(desc_stat(dat_SDQ, Diff4),
           desc_stat(dat_SDQ, Prosocial4),
           desc_stat(dat_SDQ, Peer4),
           desc_stat(dat_SDQ, Hyper4),
           desc_stat(dat_SDQ, Conduct4),
-          desc_stat(dat_SDQ, Emotional4)) %>%
-  mutate(wave = 4,
-         subscale = recode(subscale, 
-                           "Diff4" = "Diff",
-                           "Prosocial4" = "Prosocial",
-                           "Peer4" = "Peer",
-                           "Hyper4" = "Hyper",
-                           "Conduct4" = "Conduct",
-                           "Emotional4" = "Emotional"))
-w4_sdq
+          desc_stat(dat_SDQ, Emotional4))
 na_case(dat_SDQ, Diff4)
 na_case(dat_SDQ, Prosocial4)
 na_case(dat_SDQ, Peer4)
@@ -787,21 +744,12 @@ na_case(dat_SDQ, Emotional4)
 ```
 
 ```{r Wave 5}
-w5_sdq <- bind_rows(desc_stat(dat_SDQ, Diff5),
+bind_rows(desc_stat(dat_SDQ, Diff5),
           desc_stat(dat_SDQ, Prosocial5),
           desc_stat(dat_SDQ, Peer5),
           desc_stat(dat_SDQ, Hyper5),
           desc_stat(dat_SDQ, Conduct5),
-          desc_stat(dat_SDQ, Emotional5)) %>%
-  mutate(wave = 5,
-         subscale = recode(subscale, 
-                           "Diff5" = "Diff",
-                           "Prosocial5" = "Prosocial",
-                           "Peer5" = "Peer",
-                           "Hyper5" = "Hyper",
-                           "Conduct5" = "Conduct",
-                           "Emotional5" = "Emotional"))
-w5_sdq
+          desc_stat(dat_SDQ, Emotional5))
 na_case(dat_SDQ, Diff5)
 na_case(dat_SDQ, Prosocial5)
 na_case(dat_SDQ, Peer5)
@@ -811,21 +759,12 @@ na_case(dat_SDQ, Emotional5)
 ```
 
 ```{r Wave 6}
-w6_sdq <- bind_rows(desc_stat(dat_SDQ, Diff6),
+bind_rows(desc_stat(dat_SDQ, Diff6),
           desc_stat(dat_SDQ, Prosocial6),
           desc_stat(dat_SDQ, Peer6),
           desc_stat(dat_SDQ, Hyper6),
           desc_stat(dat_SDQ, Conduct6),
-          desc_stat(dat_SDQ, Emotional6)) %>%
-  mutate(wave = 6,
-         subscale = recode(subscale, 
-                           "Diff6" = "Diff",
-                           "Prosocial6" = "Prosocial",
-                           "Peer6" = "Peer",
-                           "Hyper6" = "Hyper",
-                           "Conduct6" = "Conduct",
-                           "Emotional6" = "Emotional"))
-w6_sdq
+          desc_stat(dat_SDQ, Emotional6))
 na_case(dat_SDQ, Diff6)
 na_case(dat_SDQ, Prosocial6)
 na_case(dat_SDQ, Peer6)
@@ -835,21 +774,12 @@ na_case(dat_SDQ, Emotional6)
 ```
 
 ```{r Wave 7}
-w7_sdq <- bind_rows(desc_stat(dat_SDQ, Diff7),
+bind_rows(desc_stat(dat_SDQ, Diff7),
           desc_stat(dat_SDQ, Prosocial7),
           desc_stat(dat_SDQ, Peer7),
           desc_stat(dat_SDQ, Hyper7),
           desc_stat(dat_SDQ, Conduct7),
-          desc_stat(dat_SDQ, Emotional7)) %>%
-  mutate(wave = 7,
-         subscale = recode(subscale, 
-                           "Diff7" = "Diff",
-                           "Prosocial7" = "Prosocial",
-                           "Peer7" = "Peer",
-                           "Hyper7" = "Hyper",
-                           "Conduct7" = "Conduct",
-                           "Emotional7" = "Emotional"))
-w7_sdq
+          desc_stat(dat_SDQ, Emotional7))
 na_case(dat_SDQ, Diff7)
 na_case(dat_SDQ, Prosocial7)
 na_case(dat_SDQ, Peer7)
@@ -876,24 +806,6 @@ Phi <- cramersV(x = dat_SDQ %>% pull(sex_final),
                      correct = T)
 Phi
 #Phi φ = .10
-```
-
-## Grouping differences (ethnicity vs ASD)
-
-```{r}
-results_chi_eth <- chisq.test(x = dat_SDQ %>% pull(ethnicity), # 1st grouping variable
-                      y = dat_SDQ %>% pull(ASD_final),
-                      correct = T) %>% # 2nd grouping variable
-  tidy()
-
-results_chi_eth
-#chi(1) = 8.70, p=.003
-
-Phi_eth <- cramersV(x = dat_SDQ %>% pull(ethnicity), 
-                     y = dat_SDQ %>% pull(ASD_final),
-                    correct = T)
-Phi_eth
-#Phi φ = .02
 ```
 
 ## t-tests (Total Difficulty and Subscales)
@@ -998,14 +910,14 @@ w7ttest <- bind_rows(ttestSDQ(dat_SDQ, Diff7),
   mutate(wave = 7)
 ```
 
-```{r plot}
-bind_rows(w2_sdq, w3_sdq, w4_sdq, w5_sdq, w6_sdq, w7_sdq) %>% 
-  ggplot(aes(x = wave, y = mean, colour = ASD_final)) +
+```{r d plot}
+dat_d <- bind_rows(w2ttest, w3ttest, w4ttest, w5ttest, w6ttest, w7ttest) 
+dat_d %>% 
+  ggplot(aes(x = wave, y = d)) +
   geom_point() + 
-  geom_smooth(method = lm, se = T) +
-  facet_wrap(~subscale) +
-  theme_bw()
-ggsave("subscale_plot.jpg")
+  geom_smooth(method = lm, se = F)
+ggsave("corr_plot.jpg")
+cor.test(dat_d %>% pull(wave), dat_d %>% pull(d), method = "pearson") %>% tidy()
 ```
 
 # Multiple-Indicator
@@ -1015,7 +927,7 @@ RI-CLPM (multiple-indicator versin) is carried out based on guidance by [Mulder 
 ## mod1
 
 ```{r mod1: basic model for both ASD and non-ASD}
-RICLPM_mod1 <- '
+RICLPM_mod1_ext <- '
   
   ################
   # BETWEEN PART #
@@ -1074,11 +986,11 @@ RICLPM_mod1 <- '
   # Constrain covariance of between factors and exogenous within factors to 0 
   RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
 '
-RICLPM1_mod1.fit <- sem(RICLPM_mod1, 
+RICLPM1_mod1_ext.fit <- sem(RICLPM_mod1_ext, 
   data = dat_SDQ, 
   missing = 'ML'
 )
-summary(RICLPM1_mod1.fit, standardized = T, fit.measures = T)
+summary(RICLPM1_mod1_ext.fit, standardized = T, fit.measures = T)
 #cfi = .970, RMSEA = .034, SRMR = .025
 ```
 
@@ -1086,19 +998,19 @@ summary(RICLPM1_mod1.fit, standardized = T, fit.measures = T)
 
 Group constraints. There are 2 ways to do this.
 
-```{r mod2 version 1 not used}
-#RICLPM_mod2_ext.fit <- sem(RICLPM_mod1_ext,
-#  data = dat_SDQ, 
-#  missing = "ML", 
-#  group = "ASD_final"
-#)
-#summary(RICLPM_mod2_ext.fit, standardized = T, fit.measures = T)
-#lavInspect(RICLPM_mod2_ext.fit, "cov.lv")
+```{r mod2 version 1}
+RICLPM_mod2_ext.fit <- sem(RICLPM_mod1_ext,
+  data = dat_SDQ, 
+  missing = "ML", 
+  group = "ASD_final"
+)
+summary(RICLPM_mod2_ext.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM_mod2_ext.fit, "cov.lv")
 #cfi = .968, RMSEA = .033, SRMR = .025
 ```
 
 ```{r mod2 version 2}
-RICLPM_mod2 <- '
+RICLPM_mod2_ext <- '
   
   ################
   # BETWEEN PART #
@@ -1136,7 +1048,7 @@ RICLPM_mod2 <- '
   #########################
   
   # Specify lagged effects between within-person centered latent variables (constrain   
-  # autoregressive and cross-lagged effects across groups)
+  # autoregressive effects across groups)
   Int3_F ~ c(a1, a1)*Int2_F + c(b1, b1)*Ext2_F
   Ext3_F ~ c(c1, c1)*Int2_F + c(d1, d1)*Ext2_F
   Int4_F ~ c(a2, a2)*Int3_F + c(b2, b2)*Ext3_F
@@ -1163,20 +1075,20 @@ RICLPM_mod2 <- '
   # Constrain covariance of between factors and exogenous within factors to 0 
   RI_Conduct + RI_Hyper + RI_Emotional + RI_Peer ~~ 0*Int2_F + 0*Ext2_F
 '
-RICLPM1_mod2.fit <- sem(RICLPM_mod2, 
+RICLPM1_mod2_ext_alt.fit <- sem(RICLPM_mod2_ext, 
   data = dat_SDQ, 
   missing = 'ML',
   group = "ASD_final"
 )
-summary(RICLPM1_mod2.fit, standardized = T, fit.measures = T)
-lavInspect(RICLPM1_mod2.fit, "cov.lv")
+summary(RICLPM1_mod2_ext_alt.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM1_mod2_ext_alt.fit, "cov.lv")
 #cfi = .967, RMSEA = .033, SRMR = .027
 ```
 
 ## Comparisons
 
 ```{r Comparisons}
-comp_fit <- compareFit(RICLPM1_mod1.fit, RICLPM1_mod2.fit) # constrained lagged coefficients relevant to study
+comp_fit <- compareFit(RICLPM1_mod1_ext.fit, RICLPM1_mod2_ext_alt.fit) # constrained lagged coefficients relevant to study
 summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
 ```
 
@@ -1188,13 +1100,13 @@ dat_SDQ_ASD <- dat_SDQ %>%
 ```
 
 ```{r mod3 fitting}
-RICLPM_mod3.fit <- sem(RICLPM_mod1,
+RICLPM_mod3_ext.fit <- sem(RICLPM_mod1_ext,
   data = dat_SDQ_ASD, 
   missing = "ML"
 )
-summary(RICLPM_mod3.fit, standardized = T, fit.measures = T)
-lavInspect(RICLPM_mod3.fit, "cov.lv")
-#cfi = 0.949, RMSEA = 0.048, SRMR = 0.047
+summary(RICLPM_mod3_ext.fit, standardized = T, fit.measures = T)
+lavInspect(RICLPM_mod3_ext.fit, "cov.lv")
+#cfi = .950, RMSEA = .048, SRMR = .043
 ```
 
 ## mod4: version of mod 1 for non-ASD group only
@@ -1205,215 +1117,21 @@ dat_SDQ_nonASD <- dat_SDQ %>%
 ```
 
 ```{r mod4 fitting}
-RICLPM_mod4.fit <- sem(RICLPM_mod1,
+RICLPM_mod4_ext.fit <- sem(RICLPM_mod1_ext,
   data = dat_SDQ_nonASD, 
   missing = "ML"
 )
-summary(RICLPM_mod4.fit, standardized = T, fit.measures = T)
+summary(RICLPM_mod4_ext.fit, standardized = T, fit.measures = T)
 #cfi = .969, RMSEA = .033, SRMR = .042
 ```
 
-# Sensitivity Analysis: RI-CLPM with conduct and emotional subscales
-
-RI-CLPM is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
-
-## mod5
-
-```{r mod5: basic model for both ASD and non-ASD}
-RICLPM_mod5 <- '
-  # Create between components (random intercepts)
-  CM_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
-  CM_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
-  
-  # Create within-person centered variables
-  L_Emotional2 =~ 1*Emotional2
-  L_Emotional3 =~ 1*Emotional3
-  L_Emotional4 =~ 1*Emotional4
-  L_Emotional5 =~ 1*Emotional5
-  L_Emotional6 =~ 1*Emotional6
-  L_Emotional7 =~ 1*Emotional7
-  L_Conduct2 =~ 1*Conduct2
-  L_Conduct3 =~ 1*Conduct3
-  L_Conduct4 =~ 1*Conduct4
-  L_Conduct5 =~ 1*Conduct5
-  L_Conduct6 =~ 1*Conduct6
-  L_Conduct7 =~ 1*Conduct7
-
-  # Estimate lagged effects between within-person centered variables
-  L_Conduct3 + L_Emotional3 ~ L_Conduct2 + L_Emotional2
-  L_Conduct4 + L_Emotional4 ~ L_Conduct3 + L_Emotional3
-  L_Conduct5 + L_Emotional5 ~ L_Conduct4 + L_Emotional4
-  L_Conduct6 + L_Emotional6 ~ L_Conduct5 + L_Emotional5
-  L_Conduct7 + L_Emotional7 ~ L_Conduct6 + L_Emotional6
-
-  # Estimate covariance between within-person centered variables at first wave
-  L_Conduct2 ~~ L_Emotional2 # Covariance
-  
-  # Estimate covariances between residuals of within-person centered variables 
-  # (i.e., innovations)
-  L_Conduct3 ~~ L_Emotional3
-  L_Conduct4 ~~ L_Emotional4
-  L_Conduct5 ~~ L_Emotional5
-  L_Conduct6 ~~ L_Emotional6
-  L_Conduct7 ~~ L_Emotional7
-  
-  # Estimate variance and covariance of random intercepts
-  CM_Emotional ~~ CM_Emotional
-  CM_Conduct ~~ CM_Conduct
-  CM_Emotional ~~ CM_Conduct
-
-  # Estimate (residual) variance of within-person centered variables
-  L_Conduct2 ~~ L_Conduct2 # Variances
-  L_Emotional2 ~~ L_Emotional2 
-  L_Conduct3 ~~ L_Conduct3 # Residual variances
-  L_Emotional3 ~~ L_Emotional3 
-  L_Conduct4 ~~ L_Conduct4 
-  L_Emotional4 ~~ L_Emotional4 
-  L_Conduct5 ~~ L_Conduct5 
-  L_Emotional5 ~~ L_Emotional5 
-  L_Conduct6 ~~ L_Conduct6
-  L_Emotional6 ~~ L_Emotional6
-  L_Conduct7 ~~ L_Conduct7
-  L_Emotional7 ~~ L_Emotional7
-'
-RICLPM_mod5.fit <- lavaan(RICLPM_mod5,
-  data = dat_SDQ, 
-  missing = "ML", 
-  meanstructure = T, 
-  int.ov.free = T
-)
-summary(RICLPM_mod5.fit, standardized = T, fit.measures = T)
-#cfi = .980, RMSEA = .041, SRMR = .041
-```
-
-## mod6
-
-Group constraints.
-
-```{r mod6 version 2}
-RICLPM_mod6 <- '
-  # Create between components (random intercepts)
-  CM_Emotional =~ 1*Emotional2 + 1*Emotional3 + 1*Emotional4 + 1*Emotional5 + 1*Emotional6 + 1*Emotional7
-  CM_Conduct =~ 1*Conduct2 + 1*Conduct3 + 1*Conduct4 + 1*Conduct5 + 1*Conduct6 + 1*Conduct7
-  
-  # Create within-person centered variables
-  L_Emotional2 =~ 1*Emotional2
-  L_Emotional3 =~ 1*Emotional3
-  L_Emotional4 =~ 1*Emotional4
-  L_Emotional5 =~ 1*Emotional5
-  L_Emotional6 =~ 1*Emotional6
-  L_Emotional7 =~ 1*Emotional7
-  L_Conduct2 =~ 1*Conduct2
-  L_Conduct3 =~ 1*Conduct3
-  L_Conduct4 =~ 1*Conduct4
-  L_Conduct5 =~ 1*Conduct5
-  L_Conduct6 =~ 1*Conduct6
-  L_Conduct7 =~ 1*Conduct7
-
-  # Estimate lagged effects between within-person centered variables (constrain   
-  # autoregressive effects across groups) 
-  L_Conduct3 ~ c(a1, a1)*L_Conduct2 + c(b1, b1)*L_Emotional2
-  L_Emotional3 ~ c(c1, c1)*L_Conduct2 + c(d1, d1)*L_Emotional2
-  L_Conduct4 ~ c(a2, a2)*L_Conduct3 + c(b2, b2)*L_Emotional3
-  L_Emotional4 ~ c(c2, c2)*L_Conduct3 + c(d2, d2)*L_Emotional3
-  L_Conduct5 ~ c(a3, a3)*L_Conduct4 + c(b3, b3)*L_Emotional4
-  L_Emotional5 ~ c(c3, c3)*L_Conduct4 + c(d3, d3)*L_Emotional4 
-  L_Conduct6 ~ c(a4, a4)*L_Conduct5 + c(b4, b4)*L_Emotional5
-  L_Emotional6 ~ c(c4, c4)*L_Conduct5 + c(d4, d4)*L_Emotional5
-  L_Conduct7 ~ c(a5, a5)*L_Conduct6 + c(b5, b5)*L_Emotional6
-  L_Emotional7 ~ c(c5, c5)*L_Conduct6 + c(d5, d5)*L_Emotional6
-
-  # Estimate covariance between within-person centered variables at first wave
-  L_Conduct2 ~~ L_Emotional2 # Covariance
-  
-  # Estimate covariances between residuals of within-person centered variables 
-  # (i.e., innovations)
-  L_Conduct3 ~~ L_Emotional3
-  L_Conduct4 ~~ L_Emotional4
-  L_Conduct5 ~~ L_Emotional5
-  L_Conduct6 ~~ L_Emotional6
-  L_Conduct7 ~~ L_Emotional7
-  
-  # Estimate variance and covariance of random intercepts
-  CM_Emotional ~~ CM_Emotional
-  CM_Conduct ~~ CM_Conduct
-  CM_Emotional ~~ CM_Conduct
-
-  # Estimate (residual) variance of within-person centered variables
-  L_Conduct2 ~~ L_Conduct2 # Variances
-  L_Emotional2 ~~ L_Emotional2 
-  L_Conduct3 ~~ L_Conduct3 # Residual variances
-  L_Emotional3 ~~ L_Emotional3 
-  L_Conduct4 ~~ L_Conduct4 
-  L_Emotional4 ~~ L_Emotional4 
-  L_Conduct5 ~~ L_Conduct5 
-  L_Emotional5 ~~ L_Emotional5 
-  L_Conduct6 ~~ L_Conduct6
-  L_Emotional6 ~~ L_Emotional6
-  L_Conduct7 ~~ L_Conduct7
-  L_Emotional7 ~~ L_Emotional7
-'
-RICLPM_mod6.fit <- lavaan(RICLPM_mod6,
-  data = dat_SDQ, 
-  missing = "ML", 
-  group = "ASD_final",
-  meanstructure = T, 
-  int.ov.free = T
-)
-summary(RICLPM_mod6.fit, standardized = T, fit.measures = T)
-#cfi = 0.979, RMSEA = .036, SRMR = .040
-```
-
-## Comparisons
-
-```{r Comparisons}
-comp_fit <- compareFit(RICLPM_mod5.fit, RICLPM_mod6.fit)
-summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
-```
-
-## mod7: version of mod 1 for ASD group only
-
-```{r Data subset for ASD only}
-dat_SDQ_ASD <- dat_SDQ %>%
-  filter(ASD_final == "ASD")
-```
-
-```{r mod7 fitting}
-RICLPM_mod7.fit <- lavaan(RICLPM_mod5,
-  data = dat_SDQ_ASD, 
-  missing = "ML", 
-  meanstructure = T, 
-  int.ov.free = T
-)
-summary(RICLPM_mod7.fit, standardized = T, fit.measures = T)
-#cfi = .990, RMSEA = .037, SRMR = .029
-```
-
-## mod8: version of mod 1 for non-ASD group only
-
-```{r Data subset for non-ASD only}
-dat_SDQ_nonASD <- dat_SDQ %>%
-  filter(ASD_final != "ASD")
-```
-
-```{r mod8 fitting}
-RICLPM_mod8.fit <- lavaan(RICLPM_mod5,
-  data = dat_SDQ_nonASD, 
-  missing = "ML", 
-  meanstructure = T, 
-  int.ov.free = T
-)
-summary(RICLPM_mod8.fit, standardized = T, fit.measures = T)
-#cfi = .988, RMSEA = .036, SRMR = .035
-```
-
-# Further exploratory work not reported (Sensitivity Analysis: RI-CLPM with tabulated exter-inter scores)
+# Sensitivity Analysis: RI-CLPM with tabulated exter-inter scores
 
 RI-CLPM is carried out based on guidance by [Mulder and Hamaker, (2021)](https://doi.org/10.1080/10705511.2020.1784738). Specific R code guidance is found [here](https://jeroendmulder.github.io/RI-CLPM/lavaan.html)
 
 ## mod1
 
-{r mod1: basic model for both ASD and non-ASD}
+```{r mod1: basic model for both ASD and non-ASD}
 RICLPM_mod1 <- '
   # Create between components (random intercepts)
   CM_Inter =~ 1*Exter2 + 1*Exter3 + 1*Exter4 + 1*Exter5 + 1*Exter6 + 1*Exter7
@@ -1478,13 +1196,13 @@ RICLPM_mod1.fit <- lavaan(RICLPM_mod1,
 )
 summary(RICLPM_mod1.fit, standardized = T, fit.measures = T)
 #cfi = .987, RMSEA = .039, SRMR = .038
-
+```
 
 ## mod2
 
 Group constraints. There are 2 ways to do this.
 
-{r mod2 version 1}
+```{r mod2 version 1}
 RICLPM_mod2 <- '
   # Create between components (random intercepts)
   CM_Inter =~ 1*Exter2 + 1*Exter3 + 1*Exter4 + 1*Exter5 + 1*Exter6 + 1*Exter7
@@ -1550,9 +1268,9 @@ RICLPM_mod2.fit <- lavaan(RICLPM_mod2,
 )
 summary(RICLPM_mod2.fit, standardized = T, fit.measures = T)
 #cfi = .985, RMSEA = .041, SRMR = .042
+```
 
-
-{r mod2 version 2}
+```{r mod2 version 2}
 RICLPM_mod2_alt <- '
   # Create between components (random intercepts)
   CM_Inter =~ 1*Exter2 + 1*Exter3 + 1*Exter4 + 1*Exter5 + 1*Exter6 + 1*Exter7
@@ -1623,24 +1341,24 @@ RICLPM_mod2_alt.fit <- lavaan(RICLPM_mod2_alt,
   int.ov.free = T
 )
 summary(RICLPM_mod2_alt.fit, standardized = T, fit.measures = T)
-#cfi = .987, RMSEA = .033, SRMR = .035
-
+#cfi = .987, RMSEA = .034, SRMR = .035
+```
 
 ## Comparisons
 
-{r Comparisons}
+```{r Comparisons}
 comp_fit <- compareFit(RICLPM_mod1.fit, RICLPM_mod2_alt.fit)
 summary(comp_fit,  fit.measures = c("cfi", "rmsea", "srmr"))
-
+```
 
 ## mod3: version of mod 1 for ASD group only
 
-{r Data subset for ASD only}
+```{r Data subset for ASD only}
 dat_SDQ_ASD <- dat_SDQ %>%
   filter(ASD_final == "ASD")
+```
 
-
-{r mod3 fitting}
+```{r mod3 fitting}
 RICLPM_mod3.fit <- lavaan(RICLPM_mod1,
   data = dat_SDQ_ASD, 
   missing = "ML", 
@@ -1649,16 +1367,16 @@ RICLPM_mod3.fit <- lavaan(RICLPM_mod1,
 )
 summary(RICLPM_mod3.fit, standardized = T, fit.measures = T)
 #cfi = .990, RMSEA = .037, SRMR = .029
-
+```
 
 ## mod4: version of mod 1 for non-ASD group only
 
-{r Data subset for non-ASD only}
+```{r Data subset for non-ASD only}
 dat_SDQ_nonASD <- dat_SDQ %>%
   filter(ASD_final != "ASD")
+```
 
-
-{r mod4 fitting}
+```{r mod4 fitting}
 RICLPM_mod4.fit <- lavaan(RICLPM_mod1,
   data = dat_SDQ_nonASD, 
   missing = "ML", 
@@ -1667,3 +1385,102 @@ RICLPM_mod4.fit <- lavaan(RICLPM_mod1,
 )
 summary(RICLPM_mod4.fit, standardized = T, fit.measures = T)
 #cfi = .988, RMSEA = .036, SRMR = .035
+```
+
+## Results
+
+### ASD vs Sex
+chi(1) = 159.4939, p<.001, Phi φ = .10
+
+### Wave 2 SDQ
+
+**Difficulties**
+
+t(521.646) = 13.44896, p<.001, [3.26, 4.37], d = .66 (medium effect)
+
+**Prosocial**
+
+t(528.5708) = -10.27958, p<.001, [-1.31, -.89], d = .52 (medium effect)
+
+### Wave 3 SDQ
+
+**Difficulties**
+
+t(565.2985) = 20.26116, p<.001, [5.38, 6.54], d = 1.01 (large effect)
+
+**Prosocial**
+
+t(567.1602) = -13.3991, p<.001, [-1.57, -1.17], d = .67 (medium effect)
+
+### Wave 4 SDQ
+
+**Difficulties**
+
+t(542.6737) = 24.69587, p<.001, [7.44, 8.72], d = 1.27 (large effect)
+
+**Prosocial**
+
+t(542.5182) = -15.70134, p<.001, [-1.91, -1.49], d = .82 (large effect)
+
+### Wave 5 SDQ
+
+**Difficulties**
+
+t(485.659) = 28.44564, p<.001, [9.45, 10.85], d = 1.55 (large effect)
+
+**Prosocial**
+
+t(540.1155) = -17.01301, p<.001, [-2.00, -1.58], d = .90 (large effect)
+
+### Wave 6 SDQ
+
+**Difficulties**
+
+t(494.8745) = 26.90292, p<.001, [8.91, 10.32], d = 1.43 (large effect)
+
+**Prosocial**
+
+t(496.8828) = -16.35652, p<.001, [-2.09, -1.64], d = .87 (large effect)
+
+### Wave 7 SDQ
+
+**Difficulties**
+
+t(392.1733) = 22.08333, p<.001, [8.13, 9.72], d = 1.33 (large effect)
+
+**Prosocial**
+
+t(392.3951) = -14.15916, p<.001, [-2.06, -1.56], d = .85 (large effect)
+
+### RI-CLPM fit indices
+
+mod1: cfi = .987, RMSEA = .039, SRMR = .038
+mod2 v1: cfi = .985, RMSEA = .041, SRMR = .042
+mod2 v2 (constrained lagged regression coefficients): cfi = .987, RMSEA = .034, SRMR = .035
+mod3: cfi = .990, RMSEA = .037, SRMR = .029
+mod4: cfi = .988, RMSEA = .036, SRMR = .035
+
+Chi-Squared Difference Test
+                    Df    AIC    BIC   Chisq Chisq diff    RMSEA Df diff Pr(>Chisq)    
+RICLPM.fit          37 699062 699470  951.67                                           
+RICLPM_mod2.fit     74 695688 696504 1061.43     109.76 0.010995      37  3.903e-09 ***
+RICLPM_mod2_alt.fit 94 695543 696205  956.54    -104.90 0.000000      20          1    
+
+### Multiple-indicator RI-CLPM fit indices
+
+mod1: cfi = .970, RMSEA = .034, SRMR = .025
+mod2 v1: cfi = .968, RMSEA = .033, SRMR = .025
+mod2 v2: cfi = .967, RMSEA = .033, SRMR = .027
+mod3: cfi = .950, RMSEA = .048, SRMR = .043
+mod4: cfi = .969, RMSEA = .033, SRMR = .042
+
+Chi-Squared Difference Test
+
+                          Df     AIC     BIC  Chisq Chisq diff    RMSEA Df diff Pr(>Chisq)
+RICLPM1_mod1_ext.fit     216 1086915 1087746 4303.2                                       
+RICLPM_mod2_ext.fit      432 1081521 1083184 4328.1     24.965 0.000000     216          1
+RICLPM1_mod2_ext_alt.fit 452 1081633 1083142 4480.2    152.058 0.020144      20     <2e-16
+                            
+RICLPM1_mod1_ext.fit        
+RICLPM_mod2_ext.fit         
+RICLPM1_mod2_ext_alt.fit ***
